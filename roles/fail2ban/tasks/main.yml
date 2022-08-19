@@ -1,0 +1,22 @@
+---
+- name: Install fail2ban
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Copy fail2ban.local
+  copy:
+    src: ./roles/fail2ban/templates/jail.local
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart fail2ban
+
+- name: Start and enable fail2ban service
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes

@@ -1,0 +1,7 @@
+---
+- hosts: test
+  user: vagrant
+  become: true
+
+  roles:
+  - fail2ban

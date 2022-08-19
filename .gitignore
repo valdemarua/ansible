@@ -1,1 +1,4 @@
 hosts
+*.vagrant
+*.log
+*.retry

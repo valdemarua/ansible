@@ -1,0 +1,6 @@
+[production]
+192.168.1.1
+your-server.com
+
+[test]
+192.168.56.2 # ip of vagrant instance
