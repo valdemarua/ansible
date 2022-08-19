@@ -1,0 +1,20 @@
+---
+- name: Install essenttials packages
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  loop:
+    - tmux
+    - ntp
+    - vim
+    - iotop
+    - htop
+    - atop
+    - mc
+    - zsh
+    - git
+    - git-core
+    - unzip
+    - wget
+    - curl
+    - build-essential

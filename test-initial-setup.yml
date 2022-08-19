@@ -5,3 +5,4 @@
 
   roles:
   - fail2ban
+  - packages
