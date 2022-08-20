@@ -46,7 +46,7 @@ before = paths-debian.conf
 
 # "bantime.increment" allows to use database for searching of previously banned ip's to increase a
 # default ban time using special formula, default it is banTime * 1, 2, 4, 8, 16, 32...
-#bantime.increment = true
+bantime.increment = true
 
 # "bantime.rndtime" is the max number of seconds using for mixing with random time
 # to prevent "clever" botnets calculate exact time IP can be unbanned again:
@@ -58,14 +58,14 @@ before = paths-debian.conf
 # "bantime.factor" is a coefficient to calculate exponent growing of the formula or common multiplier,
 # default value of factor is 1 and with default value of formula, the ban time
 # grows by 1, 2, 4, 8, 16 ...
-#bantime.factor = 1
+bantime.factor = 1
 
 # "bantime.formula" used by default to calculate next value of ban time, default value bellow,
 # the same ban time growing will be reached by multipliers 1, 2, 4, 8, 16, 32...
 #bantime.formula = ban.Time * (1<<(ban.Count if ban.Count<20 else 20)) * banFactor
 #
 # more aggressive example of formula has the same values only for factor "2.0 / 2.885385" :
-#bantime.formula = ban.Time * math.exp(float(ban.Count+1)*banFactor)/math.exp(1*banFactor)
+bantime.formula = ban.Time * math.exp(float(ban.Count+1)*banFactor)/math.exp(1*banFactor)
 
 # "bantime.multipliers" used to calculate next value of ban time instead of formula, coresponding
 # previously ban count and given "bantime.factor" (for multipliers default is 1);
@@ -99,7 +99,7 @@ ignorecommand =
 
 # "bantime" is the number of seconds that a host is banned.
 # bantime  = 10m
-bantime  = 720m
+bantime  = 600m
 
 # A host is banned if it has generated "maxretry" during the last "findtime"
 # seconds.
@@ -284,7 +284,7 @@ action = %(action_)s
 # normal (default), ddos, extra or aggressive (combines all).
 # See "tests/files/logs/sshd" or "filter.d/sshd.conf" for usage example and details.
 #mode   = normal
-enabled = false
+enabled = true
 mode    = aggressive
 port    = ssh
 logpath = %(sshd_log)s
