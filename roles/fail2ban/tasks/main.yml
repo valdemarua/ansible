@@ -6,7 +6,7 @@
     update_cache: yes
     cache_valid_time: 3600
 
-- name: Copy fail2ban.local
+- name: Copy jail.local file to /etc/fail2ban
   copy:
     src: ./roles/fail2ban/templates/jail.local
     dest: /etc/fail2ban/jail.local

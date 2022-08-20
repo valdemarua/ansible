@@ -1,3 +1,7 @@
 ---
-- roles:
+- hosts: production
+  # become: true
+
+  roles:
+  - packages
   - fail2ban
