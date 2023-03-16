@@ -4,28 +4,32 @@
     name: ufw
     state: latest
 
-- name: Deny incoming traffic
+- name: Reset ufw
   ufw:
-    policy: deny
-    direction: incoming
+    state: reset
 
-- name: Allow SSH
+- name: Allow incoming SSH
   ufw:
     rule: allow
     port: "{{ ssh_port }}"
     proto: tcp
 
-- name: Allow HTTP
+- name: Allow incoming HTTP
   ufw:
     rule: allow
     port: 80
     proto: tcp
 
-- name: Allow HTTPS
+- name: Allow incoming HTTPS
   ufw:
     rule: allow
     port: 443
     proto: tcp
+
+- name: Deny incoming traffic
+  ufw:
+    policy: deny
+    direction: incoming
 
 - name: Enable ufw
   ufw:
