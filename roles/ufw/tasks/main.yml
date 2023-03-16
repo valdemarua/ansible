@@ -1,0 +1,33 @@
+---
+- name: Install ufw
+  apt:
+    name: ufw
+    state: latest
+
+- name: Deny incoming traffic
+  ufw:
+    policy: deny
+    direction: incoming
+
+- name: Allow SSH
+  ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+    proto: tcp
+
+- name: Allow HTTP
+  ufw:
+    rule: allow
+    port: 80
+    proto: tcp
+
+- name: Allow HTTPS
+  ufw:
+    rule: allow
+    port: 443
+    proto: tcp
+
+- name: Enable ufw
+  ufw:
+    state: enabled
+    policy: deny
