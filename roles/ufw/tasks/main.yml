@@ -4,10 +4,6 @@
     name: ufw
     state: latest
 
-- name: Reset ufw
-  ufw:
-    state: reset
-
 - name: Allow incoming SSH
   ufw:
     rule: allow

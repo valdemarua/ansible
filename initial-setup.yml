@@ -4,5 +4,6 @@
 
   roles:
   - packages
+  - certbot
   - fail2ban
   - ufw

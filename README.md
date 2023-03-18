@@ -1,7 +1,8 @@
 ## Roles
-* packages (install essentials packages)
-* fail2ban (install, enable fail2ban)
-* ufw (install, enable ufw and allow 22, 80, 443 ports)
+* packages (installs essentials packages)
+* certbot (installs snpad package, installs core, certbot snaps)
+* fail2ban (installs, enable fail2ban)
+* ufw (installs, enables ufw and allows 22, 80, 443 ports)
 
 ## Usage
 

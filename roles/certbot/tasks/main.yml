@@ -1,0 +1,14 @@
+---
+- name: Install snapd package
+  apt:
+    name: snapd
+    update_cache: yes
+
+- name: Install core snap package
+  community.general.snap:
+    name: core
+
+- name: Install certbot snap package
+  community.general.snap:
+    name: certbot
+    classic: true
