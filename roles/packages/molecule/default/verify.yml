@@ -1,0 +1,20 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check essential packages are installed
+      command: "dpkg -s {{ item }}"
+      loop:
+        - tmux
+        - vim
+        - git
+        - curl
+        - wget
+        - unzip
+        - htop
+      changed_when: false
+
+    - name: Check git is in PATH
+      command: which git
+      changed_when: false

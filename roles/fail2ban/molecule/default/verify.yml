@@ -1,0 +1,24 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check fail2ban package is installed
+      command: dpkg -s fail2ban
+      changed_when: false
+
+    - name: Check jail.local exists
+      stat:
+        path: /etc/fail2ban/jail.local
+      register: jail_local
+    - name: Assert jail.local is present
+      assert:
+        that: jail_local.stat.exists
+
+    - name: Check fail2ban.local exists
+      stat:
+        path: /etc/fail2ban/fail2ban.local
+      register: fail2ban_local
+    - name: Assert fail2ban.local is present
+      assert:
+        that: fail2ban_local.stat.exists

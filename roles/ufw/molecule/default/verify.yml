@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check ufw is installed
+      command: dpkg -s ufw
+      changed_when: false
+
+    - name: Check ufw status
+      command: ufw status
+      register: ufw_status
+      changed_when: false
+
+    - name: Assert ufw is active
+      assert:
+        that: "'active' in ufw_status.stdout.lower()"

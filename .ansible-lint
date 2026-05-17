@@ -1,0 +1,6 @@
+warn_list:
+  - experimental
+
+skip_list:
+  - yaml[line-length]
+  - no-changed-when  # shell tasks for idempotent installs use creates:
