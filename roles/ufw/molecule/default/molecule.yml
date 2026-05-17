@@ -11,5 +11,16 @@ platforms:
     privileged: true
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
 verifier:
   name: ansible
+scenario:
+  test_sequence:
+    - destroy
+    - syntax
+    - create
+    - converge
+    - idempotence
+    - verify
+    - destroy
