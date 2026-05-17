@@ -1,0 +1,32 @@
+# This file managed by Ansible
+
+api:
+  dashboard: {{ traefik_dashboard_enabled | lower }}
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: {{ traefik_email }}
+      storage: /acme.json
+      caServer: {{ traefik_acme_caserver }}
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: {{ traefik_network }}
+
+log:
+  level: INFO

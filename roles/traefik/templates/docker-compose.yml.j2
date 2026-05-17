@@ -1,0 +1,27 @@
+# This file managed by Ansible
+
+services:
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - {{ traefik_dir }}/traefik.yml:/traefik.yml:ro
+      - {{ traefik_dir }}/acme.json:/acme.json
+    networks:
+      - {{ traefik_network }}
+{% if traefik_dashboard_enabled %}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ inventory_hostname }}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+{% endif %}
+
+networks:
+  {{ traefik_network }}:
+    external: true

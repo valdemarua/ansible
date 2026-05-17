@@ -1,0 +1,9 @@
+---
+- import_playbook: base.yml
+
+- hosts: docker_servers
+  become: true
+
+  roles:
+    - docker
+    - traefik

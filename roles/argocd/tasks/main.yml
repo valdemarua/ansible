@@ -1,0 +1,31 @@
+---
+- name: Add argo helm repo
+  command: helm repo add argo https://argoproj.github.io/argo-helm
+  changed_when: false
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Update helm repos
+  command: helm repo update
+  changed_when: false
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Install ArgoCD
+  command: >
+    helm upgrade --install argocd argo/argo-cd
+    --namespace {{ argocd_namespace }}
+    --create-namespace
+    --version {{ argocd_chart_version }}
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Wait for argocd-server to be ready
+  command: >
+    k3s kubectl rollout status deployment/argocd-server
+    -n {{ argocd_namespace }}
+  register: result
+  until: result.rc == 0
+  retries: 30
+  delay: 15
+  changed_when: false

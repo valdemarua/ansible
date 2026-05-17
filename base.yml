@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: true
+
+  roles:
+    - packages
+    - ufw
+    - fail2ban
+    - logrotate

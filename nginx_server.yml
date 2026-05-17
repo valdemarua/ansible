@@ -1,0 +1,11 @@
+---
+- import_playbook: base.yml
+
+- hosts: nginx_servers
+  become: true
+
+  roles:
+    - certbot
+    # Add your web server role here, e.g.:
+    # - nginx
+    # - passenger

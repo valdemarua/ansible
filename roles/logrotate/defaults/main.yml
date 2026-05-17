@@ -1,0 +1,4 @@
+---
+logrotate_frequency: weekly
+logrotate_keep: 4
+logrotate_compress: true

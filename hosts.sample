@@ -1,7 +1,15 @@
-[production]
-192.168.1.1
-your-server.com
-another.server ansible_user=deployer ansible_become=yes
+[docker_servers]
+your-docker-server.com ansible_user=ubuntu ansible_become=yes
+
+[nginx_servers]
+your-nginx-server.com ansible_user=ubuntu ansible_become=yes
+
+[k3s_servers]
+your-k3s-server.com ansible_user=ubuntu ansible_become=yes
+
+# Servers that only need the base playbook
+[base_servers]
+your-base-server.com ansible_user=ubuntu ansible_become=yes
 
 [test]
 192.168.56.2

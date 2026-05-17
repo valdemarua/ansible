@@ -1,0 +1,14 @@
+---
+- name: Install helm dependencies
+  apt:
+    name:
+      - curl
+    state: present
+
+- name: Install helm
+  shell: |
+    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    creates: /usr/local/bin/helm
+  environment:
+    DESIRED_VERSION: "{{ helm_version if helm_version != 'latest' else '' }}"

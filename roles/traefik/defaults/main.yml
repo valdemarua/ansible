@@ -1,0 +1,6 @@
+---
+traefik_email: ""
+traefik_network: traefik
+traefik_dashboard_enabled: false
+traefik_acme_caserver: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_dir: /opt/traefik

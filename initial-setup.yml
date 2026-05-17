@@ -1,9 +1,0 @@
----
-- hosts: production
-  # become: true
-
-  roles:
-  - packages
-  - certbot
-  - fail2ban
-  - ufw
