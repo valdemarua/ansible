@@ -64,26 +64,36 @@ Key variables to configure per environment (see `group_vars/`):
 
 ## Testing
 
-### Local: ansible-lint
+### Setup
 
 ```bash
-pip install -r requirements.txt
-ansible-lint
+make setup
 ```
 
-### Local: Molecule (role-level integration tests, Docker required)
+This installs all Python dependencies (`ansible-core`, `ansible-lint`, `molecule`, `molecule-plugins[docker]`). Requires Docker to be running for Molecule tests.
+
+> **Faster alternative:** if you have [uv](https://github.com/astral-sh/uv) installed, use `uv pip install -r requirements.txt` instead — same result, significantly faster.
+
+### Lint
+
+```bash
+make lint
+```
+
+### Molecule (role-level integration tests, Docker required)
 
 Each base role has a Molecule scenario under `roles/<role>/molecule/default/`.
 
 ```bash
-# Test a single role
-cd roles/packages && molecule test
+make test                      # run all base roles
+make test-role ROLE=packages   # run a single role
 
-# Available steps (useful during development)
+# Molecule steps (useful during development)
+cd roles/packages
 molecule converge   # apply the role to the container
-molecule verify     # run verify.yml assertions only
-molecule destroy    # tear down the container
-molecule login      # SSH into the running container for debugging
+molecule verify     # run assertions only
+molecule destroy    # tear down
+molecule login      # shell into container for debugging
 ```
 
 ### CI
