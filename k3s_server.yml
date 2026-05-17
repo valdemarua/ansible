@@ -1,7 +1,9 @@
 ---
-- import_playbook: base.yml
+- name: Base server setup
+  ansible.builtin.import_playbook: base.yml
 
-- hosts: k3s_servers
+- name: K3s server setup
+  hosts: k3s_servers
   become: true
 
   roles:

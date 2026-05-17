@@ -1,7 +1,9 @@
 ---
-- import_playbook: base.yml
+- name: Base server setup
+  ansible.builtin.import_playbook: base.yml
 
-- hosts: nginx_servers
+- name: Nginx server setup
+  hosts: nginx_servers
   become: true
 
   roles:

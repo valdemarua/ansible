@@ -4,7 +4,7 @@
   gather_facts: false
   tasks:
     - name: Check essential packages are installed
-      command: "dpkg -s {{ item }}"
+      ansible.builtin.command: "dpkg -s {{ item }}"
       loop:
         - tmux
         - vim
@@ -16,5 +16,5 @@
       changed_when: false
 
     - name: Check git is in PATH
-      command: which git
+      ansible.builtin.command: which git
       changed_when: false

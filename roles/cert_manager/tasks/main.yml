@@ -1,18 +1,18 @@
 ---
 - name: Add jetstack helm repo
-  command: helm repo add jetstack https://charts.jetstack.io
+  ansible.builtin.command: helm repo add jetstack https://charts.jetstack.io
   changed_when: false
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
 - name: Update helm repos
-  command: helm repo update
+  ansible.builtin.command: helm repo update
   changed_when: false
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
 - name: Install cert-manager
-  command: >
+  ansible.builtin.command: >
     helm upgrade --install cert-manager jetstack/cert-manager
     --namespace {{ cert_manager_namespace }}
     --create-namespace
@@ -22,22 +22,22 @@
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
 - name: Wait for cert-manager to be ready
-  command: >
+  ansible.builtin.command: >
     k3s kubectl rollout status deployment/cert-manager
     -n {{ cert_manager_namespace }}
-  register: result
-  until: result.rc == 0
+  register: cert_manager_rollout
+  until: cert_manager_rollout.rc == 0
   retries: 20
   delay: 10
   changed_when: false
 
 - name: Copy ClusterIssuer manifest
-  template:
+  ansible.builtin.template:
     src: cluster-issuer.yml.j2
     dest: /tmp/cluster-issuer.yml
-    mode: 0644
+    mode: "0644"
 
 - name: Apply ClusterIssuer
-  command: k3s kubectl apply -f /tmp/cluster-issuer.yml
+  ansible.builtin.command: k3s kubectl apply -f /tmp/cluster-issuer.yml
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml

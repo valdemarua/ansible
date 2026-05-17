@@ -1,33 +1,33 @@
 ---
 - name: Install ufw
-  apt:
+  ansible.builtin.apt:
     name: ufw
-    state: latest
+    state: present
 
 - name: Allow incoming SSH
-  ufw:
+  community.general.ufw:
     rule: allow
-    port: "{{ ssh_port }}"
+    port: "{{ ufw_ssh_port }}"
     proto: tcp
 
 - name: Allow incoming HTTP
-  ufw:
+  community.general.ufw:
     rule: allow
     port: 80
     proto: tcp
 
 - name: Allow incoming HTTPS
-  ufw:
+  community.general.ufw:
     rule: allow
     port: 443
     proto: tcp
 
 - name: Deny incoming traffic
-  ufw:
+  community.general.ufw:
     policy: deny
     direction: incoming
 
 - name: Enable ufw
-  ufw:
+  community.general.ufw:
     state: enabled
     policy: deny

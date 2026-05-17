@@ -4,9 +4,9 @@
   gather_facts: false
   tasks:
     - name: Check logrotate is installed
-      command: dpkg -s logrotate
+      ansible.builtin.command: dpkg -s logrotate
       changed_when: false
 
-    - name: Check logrotate.conf exists and is managed by Ansible
-      command: grep -q "managed by Ansible" /etc/logrotate.conf
+    - name: Check logrotate.conf is managed by Ansible
+      ansible.builtin.command: grep -q "managed by Ansible" /etc/logrotate.conf
       changed_when: false

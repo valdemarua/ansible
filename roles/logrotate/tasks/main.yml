@@ -1,15 +1,15 @@
 ---
 - name: Install logrotate
-  apt:
+  ansible.builtin.apt:
     name: logrotate
     state: present
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Configure logrotate
-  template:
+  ansible.builtin.template:
     src: logrotate.conf.j2
     dest: /etc/logrotate.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"

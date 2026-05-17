@@ -1,37 +1,38 @@
 ---
-- name: Install k3s
-  shell: |
+- name: Install k3s  # noqa: command-instead-of-module risky-shell-pipe
+  ansible.builtin.shell: |
+    set -o pipefail
     curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" sh -s - {{ k3s_extra_args }}
   args:
     creates: /usr/local/bin/k3s
 
 - name: Start and enable k3s service
-  service:
+  ansible.builtin.service:
     name: k3s
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Wait for k3s node to be ready
-  command: k3s kubectl get nodes
-  register: nodes
-  until: "'Ready' in nodes.stdout"
+  ansible.builtin.command: k3s kubectl get nodes
+  register: k3s_nodes
+  until: "'Ready' in k3s_nodes.stdout"
   retries: 20
   delay: 10
   changed_when: false
 
 - name: Create .kube directory for ansible user
-  file:
+  ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.kube"
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: 0700
+    mode: "0700"
 
 - name: Copy kubeconfig for ansible user
-  copy:
+  ansible.builtin.copy:
     src: /etc/rancher/k3s/k3s.yaml
     dest: "/home/{{ ansible_user }}/.kube/config"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: 0600
-    remote_src: yes
+    mode: "0600"
+    remote_src: true

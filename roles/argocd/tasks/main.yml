@@ -1,18 +1,18 @@
 ---
 - name: Add argo helm repo
-  command: helm repo add argo https://argoproj.github.io/argo-helm
+  ansible.builtin.command: helm repo add argo https://argoproj.github.io/argo-helm
   changed_when: false
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
 - name: Update helm repos
-  command: helm repo update
+  ansible.builtin.command: helm repo update
   changed_when: false
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
 - name: Install ArgoCD
-  command: >
+  ansible.builtin.command: >
     helm upgrade --install argocd argo/argo-cd
     --namespace {{ argocd_namespace }}
     --create-namespace
@@ -21,11 +21,11 @@
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
 - name: Wait for argocd-server to be ready
-  command: >
+  ansible.builtin.command: >
     k3s kubectl rollout status deployment/argocd-server
     -n {{ argocd_namespace }}
-  register: result
-  until: result.rc == 0
+  register: argocd_rollout
+  until: argocd_rollout.rc == 0
   retries: 30
   delay: 15
   changed_when: false

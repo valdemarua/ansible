@@ -1,2 +1,2 @@
 ---
-ssh_port: 22
+ufw_ssh_port: 22

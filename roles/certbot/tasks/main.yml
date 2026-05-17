@@ -1,28 +1,28 @@
 ---
 - name: Install snapd
-  apt:
+  ansible.builtin.apt:
     name: snapd
     state: present
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Install core snap
-  snap:
+  community.general.snap:
     name: core
     state: present
 
 - name: Refresh core snap
-  command: snap refresh core
+  ansible.builtin.command: snap refresh core
   changed_when: false
 
 - name: Install certbot snap
-  snap:
+  community.general.snap:
     name: certbot
     state: present
-    classic: yes
+    classic: true
 
 - name: Symlink certbot to /usr/bin
-  file:
+  ansible.builtin.file:
     src: /snap/bin/certbot
     dest: /usr/bin/certbot
     state: link

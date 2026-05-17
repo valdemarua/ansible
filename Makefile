@@ -4,6 +4,7 @@ ROLES ?= packages fail2ban ufw logrotate
 
 setup:
 	uv sync
+	uv run ansible-galaxy collection install -r requirements.yml
 
 lint:
 	uv run ansible-lint

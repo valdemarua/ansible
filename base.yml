@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Base server setup
+  hosts: all
   become: true
 
   roles:
