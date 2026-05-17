@@ -1,13 +1,13 @@
 ---
 dependency:
   name: galaxy
+  enabled: false
 driver:
   name: docker
 platforms:
   - name: instance
     image: geerlingguy/docker-ubuntu2204-ansible:latest
     pre_build_image: true
-    # systemd required for service management
     command: /lib/systemd/systemd
     privileged: true
     volumes:
