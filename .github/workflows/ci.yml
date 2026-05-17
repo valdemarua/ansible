@@ -48,8 +48,15 @@ jobs:
       - name: Verify Docker is accessible
         run: docker info
 
+      - name: Debug ansible collections
+        run: |
+          echo "Collections path: $(uv run ansible-galaxy collection list 2>&1 | head -5)"
+          uv run ansible-galaxy collection list
+        env:
+          ANSIBLE_COLLECTIONS_PATH: /home/runner/.ansible/collections
+
       - name: Run Molecule tests
-        run: uv run molecule test
+        run: uv run molecule --debug test 2>&1
         working-directory: roles/${{ matrix.role }}
         env:
           PY_COLORS: "1"
