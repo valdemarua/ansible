@@ -17,6 +17,7 @@ provisioner:
   name: ansible
   env:
     ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+    ANSIBLE_COLLECTIONS_PATH: "~/.ansible/collections"
 verifier:
   name: ansible
 scenario:
