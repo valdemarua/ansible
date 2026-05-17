@@ -66,13 +66,11 @@ Key variables to configure per environment (see `group_vars/`):
 
 ### Setup
 
+Requires `uv` (install via Homebrew: `brew install uv`) and Docker.
+
 ```bash
 make setup
 ```
-
-This installs all Python dependencies (`ansible-core`, `ansible-lint`, `molecule`, `molecule-plugins[docker]`). Requires Docker to be running for Molecule tests.
-
-> **Faster alternative:** if you have [uv](https://github.com/astral-sh/uv) installed, use `uv pip install -r requirements.txt` instead — same result, significantly faster.
 
 ### Lint
 

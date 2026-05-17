@@ -3,16 +3,16 @@
 ROLES ?= packages fail2ban ufw logrotate
 
 setup:
-	pip install -r requirements.txt
+	uv sync
 
 lint:
-	ansible-lint
+	uv run ansible-lint
 
 test:
 	@for role in $(ROLES); do \
 		echo "=== Testing role: $$role ==="; \
-		cd roles/$$role && molecule test && cd ../..; \
+		cd roles/$$role && uv run molecule test && cd ../..; \
 	done
 
 test-role:
-	cd roles/$(ROLE) && molecule test
+	cd roles/$(ROLE) && uv run molecule test
