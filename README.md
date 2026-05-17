@@ -66,7 +66,7 @@ Key variables to configure per environment (see `group_vars/`):
 
 ### Setup
 
-Requires `uv` (install via Homebrew: `brew install uv`) and Docker.
+Requires `uv` (`brew install uv`) and Docker. uv handles Python automatically.
 
 ```bash
 make setup
