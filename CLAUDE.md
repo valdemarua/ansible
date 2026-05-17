@@ -4,6 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+**Install all dependencies (Python deps + Ansible Galaxy collections):**
+```bash
+make setup
+```
+Requires `uv` (`brew install uv`). uv handles Python automatically. Docker is required for `make test`.
+
 **Run a playbook:**
 ```bash
 ansible-playbook base.yml
@@ -19,16 +25,20 @@ ansible-playbook base.yml --check
 
 **Lint:**
 ```bash
-pip install -r requirements.txt
-ansible-lint
+make lint
 ```
 
-**Molecule (role-level tests, Docker required):**
+**Test (Molecule, Docker required):**
 ```bash
-cd roles/packages && molecule test
-molecule converge   # apply role only
-molecule verify     # run assertions only
-molecule login      # shell into container for debugging
+make test                        # all base roles
+make test-role ROLE=packages     # single role
+
+# During development (run from within the role directory):
+cd roles/packages
+uv run molecule converge         # apply role only
+uv run molecule verify           # run assertions only
+uv run molecule destroy          # tear down container
+uv run molecule login            # shell into container for debugging
 ```
 
 **Test with Vagrant:**
@@ -56,7 +66,7 @@ Copy `hosts.sample` to `hosts`. Inventory groups:
 - `k3s_server.yml` — imports `base.yml`, then applies k3s + helm + cert_manager + argocd to `k3s_servers`.
 
 **Variables** live in `group_vars/`:
-- `group_vars/all.yml` — `ssh_port`, `timezone`
+- `group_vars/all.yml` — `ufw_ssh_port`, `timezone`
 - `group_vars/docker_servers.yml` — `traefik_email`, `traefik_dashboard_enabled`, `traefik_network`
 - `group_vars/k3s_servers.yml` — `cert_manager_email`, `cert_manager_staging`, `argocd_chart_version`
 
@@ -73,8 +83,15 @@ Copy `hosts.sample` to `hosts`. Inventory groups:
 
 Molecule scenarios live at `roles/<role>/molecule/default/`. The base roles (packages, fail2ban, ufw, logrotate) all have scenarios. GitHub Actions runs lint + molecule in CI (`.github/workflows/ci.yml`).
 
-Roles that manage systemd services (fail2ban) use `geerlingguy/docker-ubuntu2204-ansible` with `privileged: true` and a cgroup volume mount to support systemd inside Docker.
+Roles that manage systemd services (fail2ban) use `geerlingguy/docker-ubuntu2204-ansible` with `privileged: true` and a cgroup volume mount to support systemd inside Docker. Roles that manipulate iptables (ufw) only verify package installation in Molecule — asserting service state is not reliable in Docker.
+
+**colima users:** set `DOCKER_HOST` in `~/.zshrc`:
+```bash
+export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+```
 
 ## Role Conventions
 
 All roles target Ubuntu/Debian (apt). Structure: `tasks/main.yml`, optionally `defaults/main.yml`, `templates/`, `handlers/main.yml`. Use `template:` with a bare filename — Ansible resolves from the role's `templates/` directory automatically. Do not use absolute paths in `src:`.
+
+All module calls use FQCN (`ansible.builtin.*`, `community.general.*`, `community.docker.*`). Handler names use title case (`Restart fail2ban`) — `notify:` references must match exactly. Role variable names must be prefixed with the role name (e.g. `ufw_ssh_port`, not `ssh_port`).
