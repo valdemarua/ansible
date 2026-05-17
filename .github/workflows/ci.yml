@@ -45,9 +45,13 @@ jobs:
       - name: Install dependencies
         run: uv sync && uv run ansible-galaxy collection install -r requirements.yml
 
+      - name: Verify Docker is accessible
+        run: docker info
+
       - name: Run Molecule tests
         run: uv run molecule test
         working-directory: roles/${{ matrix.role }}
         env:
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
+          DOCKER_HOST: unix:///var/run/docker.sock
