@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert essential packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'git' in ansible_facts.packages"
+          - "'curl' in ansible_facts.packages"
+          - "'vim' in ansible_facts.packages"

@@ -1,0 +1,20 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert logrotate is installed
+      ansible.builtin.assert:
+        that: "'logrotate' in ansible_facts.packages"
+
+    - name: Assert logrotate.conf is present
+      ansible.builtin.stat:
+        path: /etc/logrotate.conf
+      register: logrotate_conf
+
+    - name: Assert logrotate.conf exists
+      ansible.builtin.assert:
+        that: logrotate_conf.stat.exists

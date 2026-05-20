@@ -1,0 +1,22 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert fail2ban is running
+      ansible.builtin.assert:
+        that:
+          - "'fail2ban' in ansible_facts.services"
+          - "ansible_facts.services['fail2ban'].state == 'running'"
+
+    - name: Assert jail.local exists
+      ansible.builtin.stat:
+        path: /etc/fail2ban/jail.local
+      register: fail2ban_jail
+
+    - name: Assert jail.local is present
+      ansible.builtin.assert:
+        that: fail2ban_jail.stat.exists
