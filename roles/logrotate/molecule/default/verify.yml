@@ -10,11 +10,14 @@
       ansible.builtin.assert:
         that: "'logrotate' in ansible_facts.packages"
 
-    - name: Assert logrotate.conf is present
-      ansible.builtin.stat:
-        path: /etc/logrotate.conf
+    - name: Read logrotate.conf
+      ansible.builtin.slurp:
+        src: /etc/logrotate.conf
       register: logrotate_conf
 
-    - name: Assert logrotate.conf exists
+    - name: Assert logrotate.conf contains expected values
       ansible.builtin.assert:
-        that: logrotate_conf.stat.exists
+        that:
+          - "logrotate_conf['content'] | b64decode | regex_search('^weekly$', multiline=True)"
+          - "logrotate_conf['content'] | b64decode | regex_search('^rotate 4$', multiline=True)"
+          - "logrotate_conf['content'] | b64decode | regex_search('^compress$', multiline=True)"
