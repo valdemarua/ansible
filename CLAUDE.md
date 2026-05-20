@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 make setup
 ```
-Requires `uv` (`brew install uv`). uv handles Python automatically. Docker is required for `make test`.
+Requires `uv` (`brew install uv`). uv handles Python automatically.
 
 **Run a playbook:**
 ```bash
@@ -28,23 +28,11 @@ ansible-playbook base.yml --check
 make lint
 ```
 
-**Test (Molecule, Docker required):**
-```bash
-make test                        # all base roles
-make test-role ROLE=packages     # single role
-
-# During development (run from within the role directory):
-cd roles/packages
-uv run molecule converge         # apply role only
-uv run molecule verify           # run assertions only
-uv run molecule destroy          # tear down container
-uv run molecule login            # shell into container for debugging
-```
-
-**Test with Vagrant:**
+**Integration tests (against a local VM):**
 ```bash
 vagrant up
 ansible-playbook base.yml --limit test
+# then validate with goss on the VM — see tests/
 ```
 
 ## Inventory
@@ -81,11 +69,9 @@ Copy `hosts.sample` to `hosts`. Inventory groups:
 
 ## Testing
 
-Molecule scenarios live at `roles/<role>/molecule/default/`. The base roles (packages, fail2ban, ufw, logrotate) all have scenarios. GitHub Actions runs lint + molecule in CI (`.github/workflows/ci.yml`).
+CI runs `ansible-lint` only (`.github/workflows/ci.yml`). Integration testing is done locally against Vagrant VMs using goss for assertions (see `tests/`).
 
-Roles that manage systemd services (fail2ban) use `geerlingguy/docker-ubuntu2204-ansible` with `privileged: true` and a cgroup volume mount to support systemd inside Docker. Roles that manipulate iptables (ufw) only verify package installation in Molecule — asserting service state is not reliable in Docker.
-
-**colima users:** set `DOCKER_HOST` in `~/.zshrc`:
+**colima users:** set `DOCKER_HOST` in `~/.zshrc` if needed for other tooling:
 ```bash
 export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
 ```

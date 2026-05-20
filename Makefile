@@ -1,6 +1,4 @@
-.PHONY: setup lint test test-role
-
-ROLES ?= packages fail2ban ufw logrotate
+.PHONY: setup lint
 
 setup:
 	uv sync
@@ -8,12 +6,3 @@ setup:
 
 lint:
 	uv run ansible-lint
-
-test:
-	@for role in $(ROLES); do \
-		echo "=== Testing role: $$role ==="; \
-		(cd roles/$$role && uv run molecule test) || exit 1; \
-	done
-
-test-role:
-	(cd roles/$(ROLE) && uv run molecule test)
