@@ -18,6 +18,6 @@
     - name: Assert logrotate.conf contains expected values
       ansible.builtin.assert:
         that:
-          - "logrotate_conf['content'] | b64decode | regex_search('^weekly$', multiline=True)"
-          - "logrotate_conf['content'] | b64decode | regex_search('^rotate 4$', multiline=True)"
-          - "logrotate_conf['content'] | b64decode | regex_search('^compress$', multiline=True)"
+          - "logrotate_conf['content'] | b64decode is search('(?m)^weekly$')"
+          - "logrotate_conf['content'] | b64decode is search('(?m)^rotate 4$')"
+          - "logrotate_conf['content'] | b64decode is search('(?m)^compress$')"

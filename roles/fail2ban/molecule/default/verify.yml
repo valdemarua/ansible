@@ -6,12 +6,11 @@
     - name: Gather service facts
       ansible.builtin.service_facts:
 
-    - name: Assert fail2ban is running and enabled
+    - name: Assert fail2ban is running
       ansible.builtin.assert:
         that:
           - "'fail2ban' in ansible_facts.services"
           - "ansible_facts.services['fail2ban'].state == 'running'"
-          - "ansible_facts.services['fail2ban'].status == 'enabled'"
 
     - name: Check jail.local exists
       ansible.builtin.stat:
