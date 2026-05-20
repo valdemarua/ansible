@@ -11,6 +11,8 @@ platforms:
     privileged: true
 provisioner:
   name: ansible
+  options:
+    vvv: true
   env:
     ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
     ANSIBLE_COLLECTIONS_PATH: "~/.ansible/collections"
