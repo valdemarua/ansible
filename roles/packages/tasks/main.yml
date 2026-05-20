@@ -1,35 +1,36 @@
 ---
 - name: Install essential packages
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name:
+      - tmux
+      - ntp
+      - vim
+      - iotop
+      - htop
+      - atop
+      - mc
+      - zsh
+      - git
+      - git-core
+      - unzip
+      - wget
+      - curl
+      - build-essential
+      - zlib1g-dev
+      - libssl-dev
+      - libreadline-dev
+      - libyaml-dev
+      - libsqlite3-dev
+      - sqlite3
+      - libxml2-dev
+      - libxslt1-dev
+      - libcurl4-openssl-dev
+      - software-properties-common
+      - libffi-dev
+      - dirmngr
+      - gnupg
+      - apt-transport-https
+      - ca-certificates
+    state: present
     update_cache: true
-  loop:
-    - tmux
-    - ntp
-    - vim
-    - iotop
-    - htop
-    - atop
-    - mc
-    - zsh
-    - git
-    - git-core
-    - unzip
-    - wget
-    - curl
-    - build-essential
-    - zlib1g-dev
-    - libssl-dev
-    - libreadline-dev
-    - libyaml-dev
-    - libsqlite3-dev
-    - sqlite3
-    - libxml2-dev
-    - libxslt1-dev
-    - libcurl4-openssl-dev
-    - software-properties-common
-    - libffi-dev
-    - dirmngr
-    - gnupg
-    - apt-transport-https
-    - ca-certificates
+    cache_valid_time: 3600
