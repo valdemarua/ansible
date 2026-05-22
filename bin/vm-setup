@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VM_NAME="test"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SSH_CONFIG="${HOME}/.lima/${VM_NAME}/ssh.config"
+
+if ! command -v limactl &>/dev/null; then
+  echo "Error: limactl not found. Install Lima: brew install lima"
+  exit 1
+fi
+
+# Create instance if it doesn't exist
+if ! limactl list 2>/dev/null | grep -q "^${VM_NAME}\s"; then
+  echo "Creating Lima instance '${VM_NAME}'..."
+  limactl create --name "${VM_NAME}" "${REPO_DIR}/lima/test.yaml"
+fi
+
+# Start if not running
+if ! limactl list 2>/dev/null | grep "^${VM_NAME}\s" | grep -q "Running"; then
+  echo "Starting Lima instance '${VM_NAME}'..."
+  limactl start "${VM_NAME}"
+fi
+
+cat > "${REPO_DIR}/hosts.local" <<EOF
+[test]
+lima-test ansible_become=yes
+
+[test:vars]
+ansible_ssh_common_args=-F ${SSH_CONFIG}
+EOF
+
+echo "Written to hosts.local. Run playbooks with:"
+echo "  ansible-playbook base.yml -i hosts.local --limit test"

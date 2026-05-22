@@ -54,7 +54,7 @@ Key variables to configure per environment (see `group_vars/`):
 
 | Variable | Default | Description |
 |---|---|---|
-| `ssh_port` | `22` | SSH port opened in ufw |
+| `ufw_ssh_port` | `22` | SSH port opened in ufw |
 | `traefik_email` | `admin@example.com` | ACME registration email |
 | `traefik_dashboard_enabled` | `false` | Enable Traefik dashboard |
 | `cert_manager_email` | `admin@example.com` | ACME registration email |
@@ -66,7 +66,7 @@ Key variables to configure per environment (see `group_vars/`):
 
 ### Setup
 
-Requires `uv` (`brew install uv`) and Docker. uv handles Python automatically.
+Requires `uv` (`brew install uv`). uv manages Python and all dependencies automatically.
 
 ```bash
 make setup
@@ -78,31 +78,32 @@ make setup
 make lint
 ```
 
-### Molecule (role-level integration tests, Docker required)
+### Molecule (role-level tests, Docker required)
 
 Each base role has a Molecule scenario under `roles/<role>/molecule/default/`.
 
 ```bash
-make test                      # run all base roles
-make test-role ROLE=packages   # run a single role
+make test   # run all roles
 
-# Molecule steps (useful during development)
-cd roles/packages
-molecule converge   # apply the role to the container
-molecule verify     # run assertions only
-molecule destroy    # tear down
-molecule login      # shell into container for debugging
+# Useful during development
+cd roles/fail2ban
+uv run molecule converge   # apply role to container
+uv run molecule verify     # run assertions only
+uv run molecule destroy    # tear down
+uv run molecule login      # shell into container for debugging
 ```
 
 ### CI
 
-GitHub Actions runs `ansible-lint` on every push, then runs `molecule test` for each base role in parallel. See `.github/workflows/ci.yml`.
+GitHub Actions runs `ansible-lint` + `molecule test` for each base role in parallel on every push. See `.github/workflows/ci.yml`.
 
-### Manual: Vagrant
+### Integration (Lima VM)
+
+Requires [Lima](https://github.com/lima-vm/lima) (`brew install lima`). If [colima](https://github.com/abiosoft/colima) is already installed, `limactl` is available without any extra steps.
 
 ```bash
-vagrant up
-ansible-playbook base.yml --limit test
+bin/vm-setup                                            # create + start VM
+ansible-playbook base.yml -i hosts.local --limit test  # run against VM
 ```
 
-Use Vagrant for full end-to-end smoke tests of playbook combinations (e.g. docker_server.yml) that are harder to cover with Molecule's Docker driver alone.
+`bin/vm-setup` creates a Lima VM from `lima/test.yaml` (Ubuntu 24.04, Apple Virtualization.Framework) and writes connection details to `hosts.local`.

@@ -3,7 +3,6 @@
   ansible.builtin.apt:
     name:
       - tmux
-      - ntp
       - vim
       - iotop
       - htop

@@ -28,11 +28,10 @@ ansible-playbook base.yml --check
 make lint
 ```
 
-**Integration tests (against a local VM):**
+**Integration tests (against a local Lima VM):**
 ```bash
-vagrant up
-ansible-playbook base.yml --limit test
-# then validate with goss on the VM — see tests/
+bin/vm-setup                           # create + start VM, writes hosts.local
+ansible-playbook base.yml -i hosts.local --limit test
 ```
 
 ## Inventory
@@ -41,7 +40,7 @@ Copy `hosts.sample` to `hosts`. Inventory groups:
 - `[docker_servers]` — `docker_server.yml`
 - `[nginx_servers]` — `nginx_server.yml`
 - `[k3s_servers]` — `k3s_server.yml`
-- `[test]` — Vagrant VM at `192.168.56.2`
+- `[test]` — local Lima VM, populated by `bin/vm-setup` into `hosts.local`
 
 `ansible.cfg` sets `inventory = ./hosts` with `host_key_checking = False` always on.
 
@@ -69,7 +68,7 @@ Copy `hosts.sample` to `hosts`. Inventory groups:
 
 ## Testing
 
-CI runs `ansible-lint` only (`.github/workflows/ci.yml`). Integration testing is done locally against Vagrant VMs using goss for assertions (see `tests/`).
+CI runs `ansible-lint` + molecule (Docker) via `.github/workflows/ci.yml`. Integration testing is done locally against a Lima VM (`bin/vm-setup` + `ansible-playbook -i hosts.local`).
 
 **colima users:** set `DOCKER_HOST` in `~/.zshrc` if needed for other tooling:
 ```bash

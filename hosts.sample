@@ -11,5 +11,6 @@ your-k3s-server.com ansible_user=ubuntu ansible_become=yes
 [base_servers]
 your-base-server.com ansible_user=ubuntu ansible_become=yes
 
+# Local test VM — run bin/vm-setup to create and populate hosts.local
 [test]
-192.168.56.2
+# 192.168.64.x  ansible_user=ubuntu ansible_become=yes

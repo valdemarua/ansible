@@ -1,0 +1,27 @@
+vmType: vz
+
+images:
+  - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
+    arch: aarch64
+
+cpus: 2
+memory: "2GiB"
+disk: "20GiB"
+
+networks:
+  - vzNAT: true
+
+ssh:
+  loadDotSSHPubKeys: true
+
+mounts: []
+
+containerd:
+  system: false
+  user: false
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      echo 'export TERM=xterm-256color' > /etc/profile.d/term.sh
