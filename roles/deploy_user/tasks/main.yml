@@ -1,0 +1,22 @@
+---
+- name: Create deploy user
+  ansible.builtin.user:
+    name: "{{ deploy_user_name }}"
+    shell: /bin/bash
+    create_home: true
+
+- name: Add authorized SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ deploy_user_name }}"
+    key: "{{ item }}"
+    state: present
+  loop: "{{ deploy_user_ssh_keys }}"
+
+- name: Grant passwordless sudo
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ deploy_user_name }}"
+    content: "{{ deploy_user_name }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s

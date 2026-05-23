@@ -1,0 +1,2 @@
+---
+ssh_hardening_max_auth_tries: 3

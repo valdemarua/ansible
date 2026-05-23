@@ -1,3 +1,7 @@
 ---
 ufw_ssh_port: 22
 timezone: UTC
+
+deploy_user_name: deploy
+deploy_user_ssh_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJtgWYfLFpuAcdIBtEjx+l9iiW8B4Dqhm22RRHfWPjhr server access"

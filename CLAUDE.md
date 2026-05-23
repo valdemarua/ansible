@@ -12,7 +12,11 @@ Requires `uv` (`brew install uv`). uv handles Python automatically.
 
 **Run a playbook:**
 ```bash
-ansible-playbook base.yml
+# First run on a fresh server (as provider's default user)
+ansible-playbook base.yml --limit your-server.com -e ansible_user=root
+
+# All subsequent runs (as deploy user, from inventory)
+ansible-playbook base.yml --limit your-server.com
 ansible-playbook docker_server.yml --limit your-server.com
 ansible-playbook nginx_server.yml --limit your-server.com
 ansible-playbook k3s_server.yml --limit your-server.com
@@ -47,7 +51,7 @@ Copy `hosts.sample` to `hosts`. Inventory groups:
 ## Architecture
 
 **Playbook layering** via `import_playbook`:
-- `base.yml` — foundation (packages, ufw, fail2ban, logrotate). Targets `all`.
+- `base.yml` — foundation (deploy_user, ssh_hardening, packages, ufw, fail2ban, logrotate). Targets `all`. First run: pass `-e ansible_user=ubuntu` (or whatever the provider's default user is) to create the deploy user. All subsequent runs: use the deploy user from inventory.
 - `docker_server.yml` — imports `base.yml`, then applies docker + traefik to `docker_servers`.
 - `nginx_server.yml` — imports `base.yml`, then applies certbot to `nginx_servers`. Extend with your own nginx/passenger role.
 - `k3s_server.yml` — imports `base.yml`, then applies k3s + helm + cert_manager + argocd to `k3s_servers`.

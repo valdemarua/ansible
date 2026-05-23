@@ -1,0 +1,9 @@
+---
+- name: Configure SSH hardening
+  ansible.builtin.template:
+    src: hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-hardening.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart sshd

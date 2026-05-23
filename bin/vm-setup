@@ -22,6 +22,9 @@ if ! limactl list 2>/dev/null | grep "^${VM_NAME}\s" | grep -q "Running"; then
   limactl start "${VM_NAME}"
 fi
 
+# Close any existing ControlMaster so subsequent SSH commands connect fresh
+ssh -F "${SSH_CONFIG}" -O exit lima-test 2>/dev/null || true
+
 cat > "${REPO_DIR}/hosts.local" <<EOF
 [test]
 lima-test ansible_become=yes

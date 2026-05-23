@@ -1,18 +1,17 @@
 ## Playbooks
 
-Three layered playbooks — each higher-level one imports the one below it:
-
-| Playbook | Roles applied | Target group |
-|---|---|---|
-| `base.yml` | packages, ufw, fail2ban, logrotate | `all` |
-| `docker_server.yml` | base + docker, traefik | `docker_servers` |
-| `nginx_server.yml` | base + certbot | `nginx_servers` |
-| `k3s_server.yml` | base + k3s, helm, cert_manager, argocd | `k3s_servers` |
+| Playbook | Roles applied | Target group | When to use |
+|---|---|---|---|
+| `base.yml` | deploy_user, ssh_hardening, packages, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as deploy |
+| `docker_server.yml` | base + docker, traefik | `docker_servers` | Docker + Traefik servers |
+| `nginx_server.yml` | base + certbot | `nginx_servers` | nginx/passenger/puma servers |
+| `k3s_server.yml` | base + k3s, helm, cert_manager, argocd | `k3s_servers` | k3s servers |
 
 ## Roles
 
 | Role | Purpose |
 |---|---|
+| `deploy_user` | Creates deploy user with SSH key and passwordless sudo |
 | `packages` | Essential system packages (tmux, vim, git, curl, …) |
 | `ufw` | Firewall — allows SSH, 80, 443; denies everything else |
 | `fail2ban` | Bans IPs after repeated SSH failures |
@@ -25,27 +24,35 @@ Three layered playbooks — each higher-level one imports the one below it:
 | `cert_manager` | cert-manager + ClusterIssuer for Let's Encrypt |
 | `argocd` | ArgoCD GitOps controller via Helm |
 
+## SSH Key Setup
+
+A dedicated SSH key is used for all server access. The public key is stored in `group_vars/all.yml`. Set up the private key once per Mac:
+
+```bash
+# Copy the private key to ~/.ssh/server, then fix permissions
+chmod 600 ~/.ssh/server
+```
+
 ## Usage
 
-1. Copy `hosts.sample` to `hosts` and update server addresses.
+1. Copy `hosts.sample` to `hosts` and update server addresses with `ansible_user=deploy`.
 2. Set `traefik_email` in `group_vars/docker_servers.yml`.
 3. Set `cert_manager_email` in `group_vars/k3s_servers.yml`.
 
 ```bash
-# Generic server setup only
-ansible-playbook base.yml
+# Fresh server — connect as the provider's default user.
+# AWS uses 'ubuntu', most others (Hetzner, DigitalOcean, Vultr) use 'root'.
+# This creates the deploy user, hardens SSH, and configures the base system.
+ansible-playbook base.yml --limit your-server.com -e ansible_user=root
 
-# Docker + Traefik (Let's Encrypt handled by Traefik)
-ansible-playbook docker_server.yml --limit your-docker-server.com
+# All subsequent runs — the deploy user now exists and is in inventory
+ansible-playbook base.yml --limit your-server.com
+ansible-playbook docker_server.yml --limit your-server.com
+ansible-playbook nginx_server.yml --limit your-server.com
+ansible-playbook k3s_server.yml --limit your-server.com
 
-# nginx / passenger / puma (certbot handles Let's Encrypt)
-ansible-playbook nginx_server.yml --limit your-nginx-server.com
-
-# k3s cluster
-ansible-playbook k3s_server.yml --limit your-k3s-server.com
-
-# Dry-run any playbook
-ansible-playbook docker_server.yml --check
+# Dry-run
+ansible-playbook base.yml --check --limit your-server.com
 ```
 
 ## Variables
@@ -104,6 +111,9 @@ Requires [Lima](https://github.com/lima-vm/lima) (`brew install lima`). If [coli
 ```bash
 bin/vm-setup                                            # create + start VM
 ansible-playbook base.yml -i hosts.local --limit test  # run against VM
+
+# SSH into the VM as deploy user
+ssh -F ~/.lima/test/ssh.config -i ~/.ssh/server -l deploy lima-test
 ```
 
 `bin/vm-setup` creates a Lima VM from `lima/test.yaml` (Ubuntu 24.04, Apple Virtualization.Framework) and writes connection details to `hosts.local`.

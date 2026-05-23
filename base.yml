@@ -4,6 +4,8 @@
   become: true
 
   roles:
+    - deploy_user
+    - ssh_hardening
     - packages
     - ufw
     - fail2ban
