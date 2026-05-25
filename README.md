@@ -58,6 +58,22 @@ ansible-playbook k3s_server.yml --limit your-server.com
 ansible-playbook base.yml --check --limit your-server.com
 ```
 
+### Updating system packages
+
+`update.yml` runs `apt upgrade` across all servers (or a subset). Ubuntu's `unattended-upgrades` already handles security patches automatically, so this is for when you want to deliberately update everything:
+
+```bash
+# All servers
+ansible-playbook update.yml
+
+# Specific server or group
+ansible-playbook update.yml --limit your-server.com
+ansible-playbook update.yml --limit docker_servers
+
+# Test locally against Lima VM first
+ansible-playbook update.yml -i hosts.local --limit lima-test
+```
+
 ### Updating Dokploy
 
 Dokploy updates are intentionally left as a manual operation. SSH to the server and run:
