@@ -1,0 +1,11 @@
+---
+- name: Base server setup
+  ansible.builtin.import_playbook: base.yml
+
+- name: Dokploy server setup
+  hosts: dokploy_servers
+  become: true
+
+  roles:
+    - docker
+    - dokploy

@@ -41,6 +41,7 @@ ansible-playbook base.yml -i hosts.local --limit test
 ## Inventory
 
 Copy `hosts.sample` to `hosts`. Inventory groups:
+- `[dokploy_servers]` — `dokploy_server.yml`
 - `[docker_servers]` — `docker_server.yml`
 - `[nginx_servers]` — `nginx_server.yml`
 - `[k3s_servers]` — `k3s_server.yml`

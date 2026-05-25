@@ -1,0 +1,23 @@
+---
+- name: Open Dokploy dashboard port
+  community.general.ufw:
+    rule: allow
+    port: "{{ dokploy_port }}"
+    proto: tcp
+
+- name: Check if Dokploy is already installed
+  ansible.builtin.stat:
+    path: /etc/dokploy
+  register: dokploy_dir
+
+- name: Download Dokploy install script
+  ansible.builtin.get_url:
+    url: https://dokploy.com/install.sh
+    dest: /tmp/dokploy-install.sh
+    mode: "0755"
+  when: not dokploy_dir.stat.exists
+
+- name: Install Dokploy
+  ansible.builtin.command: /tmp/dokploy-install.sh
+  when: not dokploy_dir.stat.exists
+  changed_when: true

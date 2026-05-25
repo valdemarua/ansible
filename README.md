@@ -3,7 +3,8 @@
 | Playbook | Roles applied | Target group | When to use |
 |---|---|---|---|
 | `base.yml` | deploy_user, ssh_hardening, packages, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as deploy |
-| `docker_server.yml` | base + docker, traefik | `docker_servers` | Docker + Traefik servers |
+| `dokploy_server.yml` | base + docker, dokploy | `dokploy_servers` | Dokploy PaaS servers |
+| `docker_server.yml` | base + docker, traefik | `docker_servers` | Plain Docker + Traefik servers |
 | `nginx_server.yml` | base + certbot | `nginx_servers` | nginx/passenger/puma servers |
 | `k3s_server.yml` | base + k3s, helm, cert_manager, argocd | `k3s_servers` | k3s servers |
 
@@ -12,6 +13,7 @@
 | Role | Purpose |
 |---|---|
 | `deploy_user` | Creates deploy user with SSH key and passwordless sudo |
+| `dokploy` | Dokploy PaaS — installs via official script (Docker Swarm + Traefik + Postgres + Redis) |
 | `packages` | Essential system packages (tmux, vim, git, curl, …) |
 | `ufw` | Firewall — allows SSH, 80, 443; denies everything else |
 | `fail2ban` | Bans IPs after repeated SSH failures |
@@ -47,6 +49,7 @@ ansible-playbook base.yml --limit your-server.com -e ansible_user=root
 
 # All subsequent runs — the deploy user now exists and is in inventory
 ansible-playbook base.yml --limit your-server.com
+ansible-playbook dokploy_server.yml --limit your-server.com
 ansible-playbook docker_server.yml --limit your-server.com
 ansible-playbook nginx_server.yml --limit your-server.com
 ansible-playbook k3s_server.yml --limit your-server.com
@@ -54,6 +57,16 @@ ansible-playbook k3s_server.yml --limit your-server.com
 # Dry-run
 ansible-playbook base.yml --check --limit your-server.com
 ```
+
+### Updating Dokploy
+
+Dokploy updates are intentionally left as a manual operation. SSH to the server and run:
+
+```bash
+curl -sSL https://dokploy.com/install.sh | sh -s update
+```
+
+This re-pulls the latest Docker images and restarts services while preserving all data.
 
 ## Variables
 

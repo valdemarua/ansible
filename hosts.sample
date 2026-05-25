@@ -1,16 +1,19 @@
+[dokploy_servers]
+your-dokploy-server.com ansible_user=deploy ansible_become=yes
+
 [docker_servers]
-your-docker-server.com ansible_user=ubuntu ansible_become=yes
+your-docker-server.com ansible_user=deploy ansible_become=yes
 
 [nginx_servers]
-your-nginx-server.com ansible_user=ubuntu ansible_become=yes
+your-nginx-server.com ansible_user=deploy ansible_become=yes
 
 [k3s_servers]
-your-k3s-server.com ansible_user=ubuntu ansible_become=yes
+your-k3s-server.com ansible_user=deploy ansible_become=yes
 
 # Servers that only need the base playbook
 [base_servers]
-your-base-server.com ansible_user=ubuntu ansible_become=yes
+your-base-server.com ansible_user=deploy ansible_become=yes
 
 # Local test VM — run bin/vm-setup to create and populate hosts.local
 [test]
-# 192.168.64.x  ansible_user=ubuntu ansible_become=yes
+# 192.168.64.x  ansible_user=deploy ansible_become=yes
