@@ -5,7 +5,7 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: geerlingguy/docker-ubuntu2404-ansible
+    image: geerlingguy/docker-ubuntu2604-ansible
     command: /lib/systemd/systemd
     cgroupns_mode: host
     privileged: true

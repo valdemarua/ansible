@@ -145,4 +145,4 @@ ansible-playbook base.yml -i hosts.local --limit test  # run against VM
 ssh -F ~/.lima/test/ssh.config -i ~/.ssh/server -l deploy lima-test
 ```
 
-`bin/vm-setup` creates a Lima VM from `lima/test.yaml` (Ubuntu 24.04, Apple Virtualization.Framework) and writes connection details to `hosts.local`.
+`bin/vm-setup` creates a Lima VM from `lima/test.yaml` (Ubuntu 26.04, Apple Virtualization.Framework) and writes connection details to `hosts.local`.
