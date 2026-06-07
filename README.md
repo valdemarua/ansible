@@ -84,6 +84,24 @@ curl -sSL https://dokploy.com/install.sh | sh -s update
 
 This re-pulls the latest Docker images and restarts services while preserving all data.
 
+## Security Notes
+
+### Docker bypasses UFW
+
+UFW does not protect Docker-published ports. When a service has a `ports:` mapping in docker-compose, Docker inserts iptables rules directly, bypassing UFW entirely — even if UFW has no rule allowing that port. **Any published port is reachable from the internet.**
+
+Only publish ports that genuinely need to be public (reverse proxy, Dokploy dashboard). Internal services like Redis, PostgreSQL, or OpenSearch should never have a `ports:` mapping in production compose files.
+
+### Removing a port mapping requires a container recreate
+
+Deleting `ports:` from docker-compose and redeploying only recreates containers whose configuration changed. If only app containers are rebuilt (e.g. new image), the database container keeps running with its old port binding. To close the port, the container must be explicitly recreated:
+
+```bash
+docker compose -f /path/to/docker-compose.yml up -d --force-recreate redis
+```
+
+Or trigger a full redeploy from the Dokploy UI.
+
 ## Variables
 
 Key variables to configure per environment (see `group_vars/`):
