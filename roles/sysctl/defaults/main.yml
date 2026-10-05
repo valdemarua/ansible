@@ -1,0 +1,16 @@
+---
+sysctl_settings:
+  # Allow memory overcommit — required for Redis background save (BGSAVE/AOF rewrite)
+  vm.overcommit_memory: 1
+
+  # Reduce swap aggressiveness — prefer RAM over swap (good for Docker workloads)
+  vm.swappiness: 10
+
+  # Increase max TCP connection backlog — needed for Redis and high-traffic web servers
+  net.core.somaxconn: 65535
+  net.ipv4.tcp_max_syn_backlog: 65535
+
+  # Raise inotify limits — default of 128 instances runs out with many containers
+  # (Traefik, Dokploy, file watchers), surfacing as "too many open files"
+  fs.inotify.max_user_instances: 8192
+  fs.inotify.max_user_watches: 524288

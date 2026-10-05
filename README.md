@@ -2,7 +2,7 @@
 
 | Playbook | Roles applied | Target group | When to use |
 |---|---|---|---|
-| `base.yml` | deploy_user, ssh_hardening, packages, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as deploy |
+| `base.yml` | deploy_user, ssh_hardening, packages, sysctl, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as deploy |
 | `dokploy_server.yml` | base + docker, dokploy | `dokploy_servers` | Dokploy PaaS servers |
 | `docker_server.yml` | base + docker, traefik | `docker_servers` | Plain Docker + Traefik servers |
 | `nginx_server.yml` | base + certbot | `nginx_servers` | nginx/passenger/puma servers |
@@ -15,6 +15,7 @@
 | `deploy_user` | Creates deploy user with SSH key and passwordless sudo |
 | `dokploy` | Dokploy PaaS — installs via official script (Docker Swarm + Traefik + Postgres + Redis) |
 | `packages` | Essential system packages (tmux, vim, git, curl, …) |
+| `sysctl` | Kernel tuning — memory overcommit (Redis), low swappiness, larger TCP backlog |
 | `ufw` | Firewall — allows SSH, 80, 443; denies everything else |
 | `fail2ban` | Bans IPs after repeated SSH failures |
 | `logrotate` | Configures system log rotation |
@@ -109,6 +110,7 @@ Key variables to configure per environment (see `group_vars/`):
 | Variable | Default | Description |
 |---|---|---|
 | `ufw_ssh_port` | `22` | SSH port opened in ufw |
+| `sysctl_settings` | see `roles/sysctl/defaults/main.yml` | Kernel parameters written to `/etc/sysctl.d/99-server-tuning.conf` |
 | `traefik_email` | `admin@example.com` | ACME registration email |
 | `traefik_dashboard_enabled` | `false` | Enable Traefik dashboard |
 | `cert_manager_email` | `admin@example.com` | ACME registration email |

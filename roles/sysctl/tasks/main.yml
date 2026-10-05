@@ -1,0 +1,9 @@
+---
+- name: Apply sysctl kernel parameters
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.d/99-server-tuning.conf
+  loop: "{{ sysctl_settings | dict2items }}"
