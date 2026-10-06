@@ -29,12 +29,32 @@
 
 ## SSH Key Setup
 
-A dedicated SSH key is used for all server access. The public key is stored in `group_vars/all.yml`. Set up the private key once per Mac:
+A dedicated SSH key is used for all server access. The public key is stored in
+`group_vars/all.yml`. Set up the private key once per machine:
 
 ```bash
 # Copy the private key to ~/.ssh/server, then fix permissions
 chmod 600 ~/.ssh/server
 ```
+
+**If you are using this repo for your own servers, replace that key first.** The
+checked-in key is the repo author's; leaving it in place grants them SSH access to
+every server you provision, and `deploy` has passwordless sudo. Generate your own
+and swap it in:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/server -C "server access"
+```
+
+```yaml
+# group_vars/all.yml
+deploy_user_ssh_keys:
+  - "ssh-ed25519 AAAA... your-key"
+```
+
+Removing a key from `deploy_user_ssh_keys` does not revoke it: `authorized_key`
+adds keys but never prunes ones already on a server. Remove those by hand, or with
+`state: absent`.
 
 ## Usage
 
