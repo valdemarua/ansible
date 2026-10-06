@@ -1,0 +1,6 @@
+---
+- name: Restart dokploy-firewall
+  ansible.builtin.systemd_service:
+    name: dokploy-firewall
+    state: restarted
+    daemon_reload: true

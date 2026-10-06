@@ -40,7 +40,10 @@ ansible-playbook base.yml -i hosts.local --limit test
 
 ## Inventory
 
-Copy `hosts.sample` to `hosts`. Inventory groups:
+Copy `hosts.sample` to `hosts`, or run `make link-inventory` to symlink a private
+inventory in (defaults to `~/dotfiles-private/ansible/hosts`, override with
+`INVENTORY=`). `hosts` is gitignored, so the real inventory is kept in the private
+dotfiles repo alongside the matching SSH `Host` blocks. Inventory groups:
 - `[dokploy_servers]` — `dokploy_server.yml`
 - `[docker_servers]` — `docker_server.yml`
 - `[nginx_servers]` — `nginx_server.yml`

@@ -1,9 +1,52 @@
 ---
-- name: Open Dokploy dashboard port
+# Dokploy publishes port 3000 through Docker, which DNATs before ufw's INPUT
+# chain sees the packet — a ufw "allow 3000" rule neither opens nor closes it.
+# Remove any such rule so it cannot imply a protection that does not exist.
+- name: Remove misleading ufw rule for the dashboard port
   community.general.ufw:
     rule: allow
     port: "{{ dokploy_port }}"
     proto: tcp
+    delete: true
+
+- name: Install dashboard port restriction script
+  ansible.builtin.template:
+    src: dokploy-firewall.sh.j2
+    dest: /usr/local/sbin/dokploy-firewall
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart dokploy-firewall
+
+- name: Install dashboard port restriction service
+  ansible.builtin.template:
+    src: dokploy-firewall.service.j2
+    dest: /etc/systemd/system/dokploy-firewall.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart dokploy-firewall
+
+- name: Enable dashboard port restriction
+  ansible.builtin.systemd_service:
+    name: dokploy-firewall
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# A wrong interface name, or Docker rebuilding its chains, would leave the rule
+# matching nothing — and an open dashboard looks identical to a closed one from
+# the playbook's point of view. Assert it rather than assume it.
+- name: Verify the dashboard port restriction is active
+  ansible.builtin.command:
+    cmd: >-
+      {{ item }} -C DOKPLOY-DASH
+      -i {{ dokploy_public_interface }}
+      -p tcp --dport {{ dokploy_port }} -j DROP
+  loop:
+    - iptables
+    - ip6tables
+  changed_when: false
 
 - name: Check if Dokploy is already installed
   ansible.builtin.stat:
@@ -21,3 +64,24 @@
   ansible.builtin.command: /tmp/dokploy-install.sh
   when: not dokploy_dir.stat.exists
   changed_when: true
+
+# Docker rewrites its chains while the installer brings the stack up, so re-apply
+# the restriction afterwards. Only needed on the run that actually installs:
+# later runs do not churn Docker, and the unit is PartOf=docker.service so it
+# re-applies by itself whenever Docker restarts.
+- name: Re-apply dashboard port restriction after install
+  ansible.builtin.systemd_service:
+    name: dokploy-firewall
+    state: restarted
+  when: not dokploy_dir.stat.exists
+
+- name: Verify the dashboard port restriction survived the install
+  ansible.builtin.command:
+    cmd: >-
+      {{ item }} -C DOKPLOY-DASH
+      -i {{ dokploy_public_interface }}
+      -p tcp --dport {{ dokploy_port }} -j DROP
+  loop:
+    - iptables
+    - ip6tables
+  changed_when: false

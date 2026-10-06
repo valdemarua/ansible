@@ -1,2 +1,20 @@
 ---
 dokploy_port: "3000"
+
+# Source addresses allowed to reach the dashboard directly on dokploy_port.
+#
+# Empty (the default) means the dashboard is NOT reachable from the internet.
+# Reach it over an SSH tunnel instead, which needs no open port:
+#
+#   ssh -N -L 3000:127.0.0.1:3000 your-server
+#   # then browse http://localhost:3000
+#
+# Dokploy makes the first visitor to /register the admin, so an exposed port is
+# a race against internet scanners — keep this empty until an admin exists, and
+# prefer serving the panel via Traefik on 443 (Settings -> Web Server) after that.
+dokploy_dashboard_allowed_ips: []
+
+# Public-facing interface the restriction applies to. Detected from facts, because
+# a wrong interface name would make the DROP rule match nothing and silently leave
+# the dashboard open (eth0 on Hetzner, but ens3/enp1s0 elsewhere).
+dokploy_public_interface: "{{ ansible_default_ipv4.interface }}"

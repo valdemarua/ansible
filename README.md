@@ -38,9 +38,16 @@ chmod 600 ~/.ssh/server
 
 ## Usage
 
-1. Copy `hosts.sample` to `hosts` and update server addresses with `ansible_user=deploy`.
+1. Provide an inventory, either by hand or from a private repo:
+   - `cp hosts.sample hosts`, then set server addresses with `ansible_user=deploy`, or
+   - `make link-inventory` to symlink one in (defaults to
+     `~/dotfiles-private/ansible/hosts`; override with
+     `make link-inventory INVENTORY=/path/to/hosts`).
 2. Set `traefik_email` in `group_vars/docker_servers.yml`.
 3. Set `cert_manager_email` in `group_vars/k3s_servers.yml`.
+
+A server is bootstrapped once as the provider's default user, and run as the
+deploy user from then on:
 
 ```bash
 # Fresh server — connect as the provider's default user.
@@ -58,6 +65,10 @@ ansible-playbook k3s_server.yml --limit your-server.com
 # Dry-run
 ansible-playbook base.yml --check --limit your-server.com
 ```
+
+If the inventory pins `ansible_ssh_private_key_file` (the deploy key), SSH still
+falls back to your default keys during bootstrap, so the above works unchanged on
+a fresh server. Pass `-e ansible_ssh_private_key_file=...` to force a specific one.
 
 ### Updating system packages
 
@@ -86,6 +97,32 @@ curl -sSL https://dokploy.com/install.sh | sh -s update
 This re-pulls the latest Docker images and restarts services while preserving all data.
 
 ## Security Notes
+
+### Dokploy dashboard is closed by default
+
+Dokploy makes **the first visitor to `/register` the admin**. An exposed port 3000
+is therefore a race against internet scanners, and the scanners win — they find a
+new host within minutes. From there the panel grants privileged containers with
+the host filesystem mounted, i.e. root.
+
+So the `dokploy` role does not expose port 3000. Do the initial admin registration
+over an SSH tunnel, which needs no open port:
+
+```bash
+ssh -N -L 3000:127.0.0.1:3000 your-server
+# then browse http://localhost:3000 and register
+```
+
+Afterwards, serve the panel properly over HTTPS via Settings -> Web Server (it is
+published through Traefik on 443) and enable 2FA. To allow direct access from
+fixed addresses instead, set `dokploy_dashboard_allowed_ips`:
+
+```yaml
+dokploy_dashboard_allowed_ips:
+  - 203.0.113.4
+```
+
+Note this is enforced in iptables' `DOCKER-USER` chain, **not** ufw — see below.
 
 ### Docker bypasses UFW
 

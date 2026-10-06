@@ -1,0 +1,45 @@
+#!/bin/sh
+# Managed by Ansible — do not edit.
+#
+# Dokploy publishes its dashboard with Docker (PublishMode: host), so the port is
+# DNAT'd in PREROUTING and never reaches ufw's INPUT chain. Filtering therefore
+# has to happen in DOCKER-USER, which Docker consults before its own rules.
+#
+# All rules live in a dedicated chain so that re-running this is idempotent:
+# flushing one chain cannot leave stale rules behind the way deleting individual
+# rules can.
+set -eu
+
+PORT="{{ dokploy_port }}"
+IFACE="{{ dokploy_public_interface }}"
+CHAIN="DOKPLOY-DASH"
+
+for cmd in iptables ip6tables; do
+	command -v "$cmd" >/dev/null 2>&1 || continue
+
+	$cmd -N "$CHAIN" 2>/dev/null || true
+	$cmd -F "$CHAIN"
+
+	# Exactly one jump from DOCKER-USER, at the top.
+	while $cmd -D DOCKER-USER -j "$CHAIN" 2>/dev/null; do :; done
+	$cmd -I DOCKER-USER 1 -j "$CHAIN"
+done
+
+# Allowed sources return to DOCKER-USER and carry on to Docker's own rules.
+# IPv6 entries have to go to ip6tables or they would be silently ignored.
+{% for ip in dokploy_dashboard_allowed_ips %}
+{% if ':' in ip %}
+ip6tables -A "$CHAIN" -i "$IFACE" -p tcp --dport "$PORT" -s "{{ ip }}" -j RETURN
+{% else %}
+iptables -A "$CHAIN" -i "$IFACE" -p tcp --dport "$PORT" -s "{{ ip }}" -j RETURN
+{% endif %}
+{% endfor %}
+
+# Everything else arriving on the public interface is dropped. Loopback is
+# untouched, so `ssh -L 3000:127.0.0.1:3000` still reaches the dashboard.
+for cmd in iptables ip6tables; do
+	command -v "$cmd" >/dev/null 2>&1 || continue
+	$cmd -A "$CHAIN" -i "$IFACE" -p tcp --dport "$PORT" -j DROP
+done
+
+exit 0
