@@ -1,0 +1,10 @@
+---
+- name: Base server setup
+  ansible.builtin.import_playbook: base.yml
+
+- name: Development server setup
+  hosts: devboxes
+  become: true
+
+  roles:
+    - docker

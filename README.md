@@ -3,6 +3,7 @@
 | Playbook | Roles applied | Target group | When to use |
 |---|---|---|---|
 | `base.yml` | packages, admin_user, ssh_hardening, sysctl, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as the configured administrator |
+| `devbox.yml` | base + docker | `devboxes` | Development machines with Docker and an SSH-only firewall |
 | `dokploy_server.yml` | base + docker, dokploy | `dokploy_servers` | Dokploy PaaS servers |
 | `docker_server.yml` | base + docker, traefik | `docker_servers` | Plain Docker + Traefik servers |
 | `nginx_server.yml` | base + certbot | `nginx_servers` | nginx/passenger/puma servers |
@@ -68,16 +69,17 @@ adds keys but never prunes ones already on a server. Remove those by hand, or wi
 3. Set `cert_manager_email` in `group_vars/k3s_servers.yml`.
 
 A server is bootstrapped once as the provider's default user, and run as the
-deploy user from then on:
+configured administrator from then on. Production machines default to `deploy`:
 
 ```bash
 # Fresh server — connect as the provider's default user.
 # AWS uses 'ubuntu', most others (Hetzner, DigitalOcean, Vultr) use 'root'.
-# This creates the deploy user, hardens SSH, and configures the base system.
+# This creates the configured administrator, hardens SSH, and configures the base system.
 ansible-playbook base.yml --limit your-server.com -e ansible_user=root
 
-# All subsequent runs — the deploy user now exists and is in inventory
+# All subsequent runs — the configured administrator now exists and is in inventory
 ansible-playbook base.yml --limit your-server.com
+ansible-playbook devbox.yml --limit your-devbox.com
 ansible-playbook dokploy_server.yml --limit your-server.com
 ansible-playbook docker_server.yml --limit your-server.com
 ansible-playbook nginx_server.yml --limit your-server.com
@@ -90,6 +92,46 @@ ansible-playbook base.yml --check --limit your-server.com
 If the inventory pins `ansible_ssh_private_key_file` (the deploy key), SSH still
 falls back to your default keys during bootstrap, so the above works unchanged on
 a fresh server. Pass `-e ansible_ssh_private_key_file=...` to force a specific one.
+
+### Bootstrapping a development machine
+
+Members of the `devboxes` group default to a `dev` administrator with zsh. To
+use a personal account instead, override both the managed account and the normal
+SSH connection account in inventory:
+
+```ini
+[devboxes]
+devbox.example.com ansible_user=valdemar admin_user_name=valdemar ansible_become=yes
+```
+
+Use the provider account for the first run; the inventory account is used from
+the second run onward:
+
+```bash
+# Ubuntu images normally expose the ubuntu account initially.
+ansible-playbook devbox.yml --limit devbox.example.com -e ansible_user=ubuntu
+
+# The configured administrator now exists.
+ansible-playbook devbox.yml --limit devbox.example.com
+```
+
+The profile installs Docker Engine, Compose, and Buildx, and adds the configured
+administrator to the Docker group. Log out and reconnect before using Docker
+without sudo. The firewall opens SSH only. Docker-published ports bypass UFW, so
+bind development services to localhost and reach them through an SSH tunnel:
+
+```yaml
+ports:
+  - "127.0.0.1:3000:3000"
+```
+
+```bash
+ssh -L 3000:127.0.0.1:3000 devbox.example.com
+```
+
+After Ansible finishes, clone the dotfiles as the development user, follow their
+Linux Stow instructions, install mise with its official installer, and run
+`mise install`. Those tools remain scoped to that user's home directory.
 
 ### Updating system packages
 
@@ -167,10 +209,15 @@ Key variables to configure per environment (see `group_vars/`):
 
 | Variable | Default | Description |
 |---|---|---|
+| `admin_user_name` | `deploy` | Administrator created by the base profile; devboxes override this to `dev` |
+| `admin_user_shell` | `/bin/bash` | Login shell for the administrator; devboxes use `/bin/zsh` |
+| `admin_user_ssh_keys` | `[]` | SSH public keys installed for the administrator |
+| `admin_user_passwordless_sudo` | `true` | Whether to create a passwordless sudoers entry |
 | `ufw_ssh_port` | `22` | SSH port always opened in ufw |
 | `ufw_allowed_tcp_ports` | `[]` | Additional TCP ports opened for a server profile |
 | `ufw_allowed_udp_ports` | `[]` | Additional UDP ports opened for a server profile |
 | `packages_extra` | `[]` | Additional APT packages installed for a server profile |
+| `docker_users` | configured administrator | Users added to the `docker` group |
 | `sysctl_settings` | see `roles/sysctl/defaults/main.yml` | Kernel parameters written to `/etc/sysctl.d/99-server-tuning.conf` |
 | `traefik_email` | `admin@example.com` | ACME registration email |
 | `traefik_dashboard_enabled` | `false` | Enable Traefik dashboard |
