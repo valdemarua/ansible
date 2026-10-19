@@ -58,8 +58,9 @@
     state: started
     enabled: true
 
-- name: Add deploy user to docker group
+- name: Add users to docker group
   ansible.builtin.user:
-    name: "{{ deploy_user_name }}"
+    name: "{{ item }}"
     groups: docker
     append: true
+  loop: "{{ docker_users }}"

@@ -1,0 +1,29 @@
+---
+- name: Create administrator account
+  ansible.builtin.user:
+    name: "{{ admin_user_name }}"
+    shell: "{{ admin_user_shell }}"
+    create_home: true
+
+- name: Add administrator SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ admin_user_name }}"
+    key: "{{ item }}"
+    state: present
+  loop: "{{ admin_user_ssh_keys }}"
+
+- name: Grant passwordless sudo to administrator
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ admin_user_name }}"
+    content: "{{ admin_user_name }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s
+  when: admin_user_passwordless_sudo
+
+- name: Remove passwordless sudo configuration
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ admin_user_name }}"
+    state: absent
+  when: not admin_user_passwordless_sudo

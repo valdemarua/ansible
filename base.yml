@@ -4,9 +4,9 @@
   become: true
 
   roles:
-    - deploy_user
-    - ssh_hardening
     - packages
+    - admin_user
+    - ssh_hardening
     - sysctl
     - ufw
     - fail2ban

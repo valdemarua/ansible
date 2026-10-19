@@ -2,7 +2,7 @@
 
 | Playbook | Roles applied | Target group | When to use |
 |---|---|---|---|
-| `base.yml` | deploy_user, ssh_hardening, packages, sysctl, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as deploy |
+| `base.yml` | packages, admin_user, ssh_hardening, sysctl, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as the configured administrator |
 | `dokploy_server.yml` | base + docker, dokploy | `dokploy_servers` | Dokploy PaaS servers |
 | `docker_server.yml` | base + docker, traefik | `docker_servers` | Plain Docker + Traefik servers |
 | `nginx_server.yml` | base + certbot | `nginx_servers` | nginx/passenger/puma servers |
@@ -12,7 +12,7 @@
 
 | Role | Purpose |
 |---|---|
-| `deploy_user` | Creates deploy user with SSH key and passwordless sudo |
+| `admin_user` | Creates a configurable administrator with SSH keys and optional passwordless sudo |
 | `dokploy` | Dokploy PaaS — installs via official script (Docker Swarm + Traefik + Postgres + Redis) |
 | `packages` | Essential system packages (tmux, vim, git, curl, …) |
 | `sysctl` | Kernel tuning — memory overcommit (Redis), low swappiness, larger TCP backlog |
@@ -30,7 +30,8 @@
 ## SSH Key Setup
 
 A dedicated SSH key is used for all server access. The public key is stored in
-`group_vars/all.yml`. Set up the private key once per machine:
+`group_vars/all.yml`. The default administrator remains `deploy`. Set up the
+private key once per machine:
 
 ```bash
 # Copy the private key to ~/.ssh/server, then fix permissions
@@ -48,11 +49,11 @@ ssh-keygen -t ed25519 -f ~/.ssh/server -C "server access"
 
 ```yaml
 # group_vars/all.yml
-deploy_user_ssh_keys:
+admin_user_ssh_keys:
   - "ssh-ed25519 AAAA... your-key"
 ```
 
-Removing a key from `deploy_user_ssh_keys` does not revoke it: `authorized_key`
+Removing a key from `admin_user_ssh_keys` does not revoke it: `authorized_key`
 adds keys but never prunes ones already on a server. Remove those by hand, or with
 `state: absent`.
 
