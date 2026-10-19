@@ -14,9 +14,9 @@
 |---|---|
 | `admin_user` | Creates a configurable administrator with SSH keys and optional passwordless sudo |
 | `dokploy` | Dokploy PaaS — installs via official script (Docker Swarm + Traefik + Postgres + Redis) |
-| `packages` | Essential system packages (tmux, vim, git, curl, …) |
+| `packages` | Essential system packages plus profile-specific additions |
 | `sysctl` | Kernel tuning — memory overcommit (Redis), low swappiness, larger TCP backlog |
-| `ufw` | Firewall — allows SSH, 80, 443; denies everything else |
+| `ufw` | Firewall — allows SSH plus profile-specific ports; denies everything else |
 | `fail2ban` | Bans IPs after repeated SSH failures |
 | `logrotate` | Configures system log rotation |
 | `certbot` | Let's Encrypt via snap — for nginx/passenger/puma setups |
@@ -167,7 +167,10 @@ Key variables to configure per environment (see `group_vars/`):
 
 | Variable | Default | Description |
 |---|---|---|
-| `ufw_ssh_port` | `22` | SSH port opened in ufw |
+| `ufw_ssh_port` | `22` | SSH port always opened in ufw |
+| `ufw_allowed_tcp_ports` | `[]` | Additional TCP ports opened for a server profile |
+| `ufw_allowed_udp_ports` | `[]` | Additional UDP ports opened for a server profile |
+| `packages_extra` | `[]` | Additional APT packages installed for a server profile |
 | `sysctl_settings` | see `roles/sysctl/defaults/main.yml` | Kernel parameters written to `/etc/sysctl.d/99-server-tuning.conf` |
 | `traefik_email` | `admin@example.com` | ACME registration email |
 | `traefik_dashboard_enabled` | `false` | Enable Traefik dashboard |

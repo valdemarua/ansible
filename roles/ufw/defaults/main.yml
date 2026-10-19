@@ -1,2 +1,4 @@
 ---
 ufw_ssh_port: 22
+ufw_allowed_tcp_ports: []
+ufw_allowed_udp_ports: []

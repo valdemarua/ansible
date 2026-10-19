@@ -62,8 +62,9 @@ dotfiles repo alongside the matching SSH `Host` blocks. Inventory groups:
 
 **Variables** live in `group_vars/`:
 - `group_vars/all.yml` — `ufw_ssh_port`, `timezone`
-- `group_vars/docker_servers.yml` — `traefik_email`, `traefik_dashboard_enabled`, `traefik_network`
-- `group_vars/k3s_servers.yml` — `cert_manager_email`, `cert_manager_staging`, `argocd_chart_version`
+- `group_vars/docker_servers.yml` — `traefik_email`, `traefik_dashboard_enabled`, `traefik_network`, public web ports
+- `group_vars/dokploy_servers.yml` and `group_vars/nginx_servers.yml` — public web ports
+- `group_vars/k3s_servers.yml` — `cert_manager_email`, `cert_manager_staging`, `argocd_chart_version`, public web ports
 
 **SSL strategy by playbook:**
 - `docker_server.yml` — Traefik handles ACME automatically per-container via labels. No certbot.
