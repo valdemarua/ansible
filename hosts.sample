@@ -1,12 +1,6 @@
 [dokploy_servers]
 your-dokploy-server.com ansible_user=deploy ansible_become=yes
 
-[docker_servers]
-your-docker-server.com ansible_user=deploy ansible_become=yes
-
-[nginx_servers]
-your-nginx-server.com ansible_user=deploy ansible_become=yes
-
 [k3s_servers]
 your-k3s-server.com ansible_user=deploy ansible_become=yes
 

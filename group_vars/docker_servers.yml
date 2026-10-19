@@ -1,8 +1,0 @@
----
-traefik_email: admin@example.com
-traefik_dashboard_enabled: false
-traefik_network: traefik
-
-ufw_allowed_tcp_ports:
-  - 80
-  - 443

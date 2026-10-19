@@ -18,8 +18,7 @@ ansible-playbook base.yml --limit your-server.com -e ansible_user=root
 # All subsequent runs (as the configured administrator from inventory)
 ansible-playbook base.yml --limit your-server.com
 ansible-playbook devbox.yml --limit your-devbox.com
-ansible-playbook docker_server.yml --limit your-server.com
-ansible-playbook nginx_server.yml --limit your-server.com
+ansible-playbook dokploy_server.yml --limit your-server.com
 ansible-playbook k3s_server.yml --limit your-server.com
 ```
 
@@ -46,9 +45,7 @@ inventory in (defaults to `~/dotfiles-private/ansible/hosts`, override with
 `INVENTORY=`). `hosts` is gitignored, so the real inventory is kept in the private
 dotfiles repo alongside the matching SSH `Host` blocks. Inventory groups:
 - `[dokploy_servers]` — `dokploy_server.yml`
-- `[docker_servers]` — `docker_server.yml`
 - `[devboxes]` — `devbox.yml`; defaults to the `dev` administrator, overridable per host
-- `[nginx_servers]` — `nginx_server.yml`
 - `[k3s_servers]` — `k3s_server.yml`
 - `[test]` — local Lima VM, populated by `bin/vm-setup` into `hosts.local`
 
@@ -59,23 +56,18 @@ dotfiles repo alongside the matching SSH `Host` blocks. Inventory groups:
 **Playbook layering** via `import_playbook`:
 - `base.yml` — foundation (packages, admin_user, ssh_hardening, sysctl, ufw, fail2ban, logrotate). Targets `all`. First run: pass `-e ansible_user=ubuntu` (or whatever the provider's default user is) to create the configured administrator. All subsequent runs: use that administrator from inventory. The account defaults to `deploy` for backward compatibility.
 - `devbox.yml` — imports base, then installs Docker for `devboxes`. The profile defaults to a `dev` account with zsh and adds Stow; use `admin_user_name` to choose a personal account instead. Its UFW profile exposes SSH only.
-- `docker_server.yml` — imports `base.yml`, then applies docker + traefik to `docker_servers`.
-- `nginx_server.yml` — imports `base.yml`, then applies certbot to `nginx_servers`. Extend with your own nginx/passenger role.
+- `dokploy_server.yml` — imports `base.yml`, then installs Docker and Dokploy for `dokploy_servers`. Dokploy owns its application stack and Traefik instance.
 - `k3s_server.yml` — imports `base.yml`, then applies k3s + helm + cert_manager + argocd to `k3s_servers`.
 
 **Variables** live in `group_vars/`:
 - `group_vars/all.yml` — `ufw_ssh_port`, `timezone`
 - `group_vars/devboxes.yml` — development administrator defaults and additional packages
-- `group_vars/docker_servers.yml` — `traefik_email`, `traefik_dashboard_enabled`, `traefik_network`, public web ports
-- `group_vars/dokploy_servers.yml` and `group_vars/nginx_servers.yml` — public web ports
+- `group_vars/dokploy_servers.yml` — public web ports
 - `group_vars/k3s_servers.yml` — `cert_manager_email`, `cert_manager_staging`, `argocd_chart_version`, public web ports
 
-**SSL strategy by playbook:**
-- `docker_server.yml` — Traefik handles ACME automatically per-container via labels. No certbot.
-- `nginx_server.yml` — certbot (via snap) manages certs in `/etc/letsencrypt/`.
+**TLS strategy by playbook:**
+- `dokploy_server.yml` — Dokploy manages its own Traefik proxy and certificates.
 - `k3s_server.yml` — cert-manager + ClusterIssuer. `cert_manager_staging: true` by default; set `false` for production.
-
-**Traefik** runs as a Docker container in `/opt/traefik/` (templated `docker-compose.yml` + `traefik.yml`). The `traefik_network` Docker network is created by the traefik role and must be declared `external: true` in any other docker-compose stack that joins it.
 
 **k3s role** copies `/etc/rancher/k3s/k3s.yaml` to `~/.kube/config` for `ansible_user`. The cert_manager and argocd roles run as root (`become: true`) and use `KUBECONFIG: /etc/rancher/k3s/k3s.yaml` directly.
 

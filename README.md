@@ -5,8 +5,6 @@
 | `base.yml` | packages, admin_user, ssh_hardening, sysctl, ufw, fail2ban, logrotate | `all` | Every run — first time as the provider's default user, after that as the configured administrator |
 | `devbox.yml` | base + docker | `devboxes` | Development machines with Docker and an SSH-only firewall |
 | `dokploy_server.yml` | base + docker, dokploy | `dokploy_servers` | Dokploy PaaS servers |
-| `docker_server.yml` | base + docker, traefik | `docker_servers` | Plain Docker + Traefik servers |
-| `nginx_server.yml` | base + certbot | `nginx_servers` | nginx/passenger/puma servers |
 | `k3s_server.yml` | base + k3s, helm, cert_manager, argocd | `k3s_servers` | k3s servers |
 
 ## Roles
@@ -20,9 +18,7 @@
 | `ufw` | Firewall — allows SSH plus profile-specific ports; denies everything else |
 | `fail2ban` | Bans IPs after repeated SSH failures |
 | `logrotate` | Configures system log rotation |
-| `certbot` | Let's Encrypt via snap — for nginx/passenger/puma setups |
 | `docker` | Docker CE + compose plugin via official apt repo |
-| `traefik` | Traefik v3 reverse proxy with automatic Let's Encrypt (ACME) |
 | `k3s` | Lightweight Kubernetes via k3s |
 | `helm` | Helm CLI |
 | `cert_manager` | cert-manager + ClusterIssuer for Let's Encrypt |
@@ -65,8 +61,7 @@ adds keys but never prunes ones already on a server. Remove those by hand, or wi
    - `make link-inventory` to symlink one in (defaults to
      `~/dotfiles-private/ansible/hosts`; override with
      `make link-inventory INVENTORY=/path/to/hosts`).
-2. Set `traefik_email` in `group_vars/docker_servers.yml`.
-3. Set `cert_manager_email` in `group_vars/k3s_servers.yml`.
+2. Set `cert_manager_email` in `group_vars/k3s_servers.yml` when provisioning k3s.
 
 A server is bootstrapped once as the provider's default user, and run as the
 configured administrator from then on. Production machines default to `deploy`:
@@ -81,8 +76,6 @@ ansible-playbook base.yml --limit your-server.com -e ansible_user=root
 ansible-playbook base.yml --limit your-server.com
 ansible-playbook devbox.yml --limit your-devbox.com
 ansible-playbook dokploy_server.yml --limit your-server.com
-ansible-playbook docker_server.yml --limit your-server.com
-ansible-playbook nginx_server.yml --limit your-server.com
 ansible-playbook k3s_server.yml --limit your-server.com
 
 # Dry-run
@@ -143,7 +136,7 @@ ansible-playbook update.yml
 
 # Specific server or group
 ansible-playbook update.yml --limit your-server.com
-ansible-playbook update.yml --limit docker_servers
+ansible-playbook update.yml --limit dokploy_servers
 
 # Test locally against Lima VM first
 ansible-playbook update.yml -i hosts.local --limit lima-test
@@ -219,8 +212,6 @@ Key variables to configure per environment (see `group_vars/`):
 | `packages_extra` | `[]` | Additional APT packages installed for a server profile |
 | `docker_users` | configured administrator | Users added to the `docker` group |
 | `sysctl_settings` | see `roles/sysctl/defaults/main.yml` | Kernel parameters written to `/etc/sysctl.d/99-server-tuning.conf` |
-| `traefik_email` | `admin@example.com` | ACME registration email |
-| `traefik_dashboard_enabled` | `false` | Enable Traefik dashboard |
 | `cert_manager_email` | `admin@example.com` | ACME registration email |
 | `cert_manager_staging` | `true` | Use Let's Encrypt staging (set `false` for prod) |
 | `argocd_chart_version` | `7.7.0` | ArgoCD Helm chart version |
