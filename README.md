@@ -122,9 +122,54 @@ ports:
 ssh -L 3000:127.0.0.1:3000 devbox.example.com
 ```
 
-After Ansible finishes, clone the dotfiles as the development user, follow their
-Linux Stow instructions, install mise with its official installer, and run
-`mise install`. Those tools remain scoped to that user's home directory.
+After Ansible finishes, connect as the development user. Install mise with its
+official user-scoped installer, clone the dotfiles, and Stow only the headless
+Linux packages:
+
+```bash
+ssh valdemar@devbox.example.com
+
+curl -fsSL https://mise.run | sh
+git clone https://github.com/valdemarua/dotfiles.git ~/dotfiles
+
+cd ~/dotfiles
+stow --restow \
+  git \
+  mise \
+  nvim \
+  starship \
+  tmux \
+  zsh
+```
+
+Install the configured language defaults and Linux CLI applications:
+
+```bash
+~/.local/bin/mise install
+```
+
+Install Oh My Zsh without replacing the Stow-managed `.zshrc`, then start a new
+shell:
+
+```bash
+RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+exec zsh
+```
+
+Verify the user environment and Docker installation:
+
+```bash
+mise config ls
+mise ls --current
+mise doctor
+docker run --rm hello-world
+```
+
+The mise-managed tools remain scoped to the development user's home directory.
+The dotfiles repository contains more detail about optional editor and tmux
+plugin setup.
 
 ### Updating system packages
 
