@@ -4,3 +4,4 @@ admin_user_shell: /bin/zsh
 
 packages_extra:
   - stow
+  - libvips-tools

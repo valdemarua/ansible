@@ -174,6 +174,9 @@ ansible-playbook devbox.yml --limit devbox.example.com -e ansible_user=ubuntu
 ansible-playbook devbox.yml --limit devbox.example.com
 ```
 
+The profile also installs Stow and libvips (with its CLI tools) for native
+development. These profile-specific packages are listed in `group_vars/devboxes.yml`.
+
 The profile installs Docker Engine, Compose, and Buildx, and adds the configured
 administrator to the Docker group. Log out and reconnect before using Docker
 without sudo. The firewall opens SSH only. Docker-published ports bypass UFW, so
