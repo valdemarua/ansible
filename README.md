@@ -127,41 +127,19 @@ ports:
 ssh -L 3000:127.0.0.1:3000 devbox.example.com
 ```
 
-After Ansible finishes, connect as the development user. Install mise with its
-official user-scoped installer, clone the dotfiles, and Stow only the headless
-Linux packages:
+After Ansible finishes, connect as the development user, clone the dotfiles, and
+run their Linux bootstrap script. If zsh displays its new-user setup wizard, press
+`q`; the bootstrap script will install the managed `.zshrc`:
 
 ```bash
 ssh dev@devbox.example.com
-
-curl -fsSL https://mise.run | sh
 git clone https://github.com/valdemarua/dotfiles.git ~/dotfiles
-
-cd ~/dotfiles
-stow --restow \
-  git \
-  mise \
-  nvim \
-  starship \
-  tmux \
-  zsh
-```
-
-Install the configured language defaults and Linux CLI applications:
-
-```bash
-~/.local/bin/mise install
-```
-
-Install Oh My Zsh without replacing the Stow-managed `.zshrc`, then start a new
-shell:
-
-```bash
-RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
+~/dotfiles/bin/bootstrap-linux
 exec zsh
 ```
+
+The idempotent script links the headless Linux configuration, installs mise and
+Oh My Zsh when needed, and installs the configured runtimes and Linux CLI tools.
 
 Verify the user environment and Docker installation:
 
