@@ -95,6 +95,19 @@ Members of the `devboxes` group default to a `dev` administrator with zsh:
 devbox.example.com ansible_user=dev ansible_become=yes
 ```
 
+Use the inventory alias for Ansible commands such as `--limit`, and set the
+built-in `ansible_host` connection variable when the address differs. Set
+`server_hostname` when Ansible should manage the system hostname. For example:
+
+```ini
+[devboxes]
+devbox ansible_host=192.0.2.10 server_hostname=devbox ansible_user=dev ansible_become=yes
+```
+
+When `server_hostname` is set, the base playbook configures cloud-init to
+preserve it and applies it immediately; no reboot is required. Leave it unset
+on hosts where the system hostname should remain provider-managed.
+
 To choose a different neutral account name, override both the managed account
 and the normal SSH connection account, for example:
 
@@ -230,6 +243,7 @@ Key variables to configure per environment (see `group_vars/`):
 
 | Variable | Default | Description |
 |---|---|---|
+| `server_hostname` | unset | Optional system hostname; when set, cloud-init is configured to preserve it |
 | `admin_user_name` | `deploy` | Administrator created by the base profile; devboxes override this to `dev` |
 | `admin_user_shell` | `/bin/bash` | Login shell for the administrator; devboxes use `/bin/zsh` |
 | `admin_user_ssh_keys` | `[]` | SSH public keys installed for the administrator |

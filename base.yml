@@ -3,6 +3,21 @@
   hosts: all
   become: true
 
+  pre_tasks:
+    - name: Preserve an explicitly configured hostname in cloud-init
+      ansible.builtin.copy:
+        dest: /etc/cloud/cloud.cfg.d/99-preserve-hostname.cfg
+        content: "preserve_hostname: true\n"
+        owner: root
+        group: root
+        mode: "0644"
+      when: server_hostname is defined
+
+    - name: Set the explicitly configured system hostname
+      ansible.builtin.hostname:
+        name: "{{ server_hostname }}"
+      when: server_hostname is defined
+
   roles:
     - packages
     - admin_user
