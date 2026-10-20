@@ -40,10 +40,12 @@ ansible-playbook base.yml -i hosts.local --limit test
 
 ## Inventory
 
-Copy `hosts.sample` to `hosts`, or run `make link-inventory` to symlink a private
-inventory in (defaults to `~/dotfiles-private/ansible/hosts`, override with
-`INVENTORY=`). `hosts` is gitignored, so the real inventory is kept in the private
-dotfiles repo alongside the matching SSH `Host` blocks. Inventory groups:
+Copy `hosts.sample` to `hosts`, or run
+`make link-inventory INVENTORY=/absolute/path/to/inventory` to link an external
+inventory directory, including its `group_vars`. `hosts` is gitignored.
+Keep authorized public keys in the inventory's `admin_user_ssh_keys` list;
+the administrator role rejects an empty list. See the README's inventory example
+for the expected hosts, connection settings, and key data. Inventory groups:
 - `[dokploy_servers]` — `dokploy_server.yml`
 - `[devboxes]` — `devbox.yml`; defaults to the `dev` administrator, overridable per host
 - `[k3s_servers]` — `k3s_server.yml`

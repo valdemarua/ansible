@@ -37,13 +37,8 @@ ssh-keygen -t ed25519 -f ~/.ssh/server -C "server access"
 chmod 600 ~/.ssh/server
 ```
 
-```yaml
-# Private inventory: group_vars/all.yml
-admin_user_ssh_keys:
-  - "ssh-ed25519 AAAA... your-key"
-```
-
-Append more public keys as additional list entries. Keep private keys on their
+Set `admin_user_ssh_keys` as shown in the inventory example below, and append
+more public keys as additional list entries. Keep private keys on their
 client devices or in a password manager; never commit them. The inventory's
 `ansible_ssh_private_key_file` selects the local private key Ansible connects with.
 
@@ -63,6 +58,58 @@ adds keys but never prunes ones already on a server. Remove those by hand, or wi
      inventory directory, including its `group_vars`. Rerun this command if
      `hosts` previously linked to the inventory file rather than its directory.
 2. Set `cert_manager_email` in `group_vars/k3s_servers.yml` when provisioning k3s.
+
+### Inventory example
+
+Keep machine-specific data in an external inventory directory:
+
+```text
+inventory/
+  hosts
+  group_vars/
+    all.yml
+```
+
+Example `inventory/hosts`:
+
+```ini
+[devboxes]
+devbox ansible_host=192.0.2.10 ansible_user=dev
+
+[dokploy_servers]
+production ansible_host=192.0.2.20 ansible_user=deploy
+
+[all:vars]
+ansible_become=yes
+ansible_ssh_private_key_file=~/.ssh/server
+```
+
+Example `inventory/group_vars/all.yml`:
+
+```yaml
+---
+admin_user_ssh_keys:
+  - "ssh-ed25519 AAAA... laptop"
+  - "ssh-ed25519 AAAA... another-client"
+```
+
+Replace the example addresses and public-key placeholders with your own values.
+The inventory supplies the server groups and addresses, SSH login users, local
+private-key path, and public keys to authorize. Omit `ansible_ssh_private_key_file`
+when using your SSH agent or default identities. Private-key contents never
+belong in the inventory.
+
+The key list in `group_vars/all.yml` applies to every server. For a group-specific
+list, use `group_vars/devboxes.yml`, for example; include every key that should
+remain authorized for that group, because lists replace inherited lists.
+
+Link the directory once:
+
+```sh
+make link-inventory INVENTORY=/absolute/path/to/inventory
+```
+
+### Running playbooks
 
 A server is bootstrapped once as the provider's default user, and run as the
 configured administrator from then on. Production machines default to `deploy`:
