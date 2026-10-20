@@ -16,3 +16,8 @@ your-devbox.com ansible_user=dev ansible_become=yes
 # Local test VM — run bin/vm-setup to create and populate hosts.local
 [test]
 # 192.168.64.x  ansible_user=deploy ansible_become=yes
+
+[all:vars]
+# Add your public keys when using this as a standalone inventory file.
+# For private inventory directories, prefer group_vars/all.yml instead.
+# admin_user_ssh_keys=["ssh-ed25519 AAAA... your-key"]

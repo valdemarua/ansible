@@ -26,29 +26,30 @@
 
 ## SSH Key Setup
 
-A dedicated SSH key is used for all server access. The public key is stored in
-`group_vars/all.yml`. The default administrator remains `deploy`. Set up the
-private key once per machine:
+Authorized public keys belong in your private inventory. This repository does not
+provide personal keys, and provisioning stops if `admin_user_ssh_keys` is empty.
+The default administrator remains `deploy` and has passwordless sudo.
 
-```bash
-# Copy the private key to ~/.ssh/server, then fix permissions
-chmod 600 ~/.ssh/server
-```
-
-**If you are using this repo for your own servers, replace that key first.** The
-checked-in key is the repo author's; leaving it in place grants them SSH access to
-every server you provision, and `deploy` has passwordless sudo. Generate your own
-and swap it in:
+Generate a key on the client or in your password manager. For a local key file:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/server -C "server access"
+chmod 600 ~/.ssh/server
 ```
 
 ```yaml
-# group_vars/all.yml
+# Private inventory: group_vars/all.yml
 admin_user_ssh_keys:
   - "ssh-ed25519 AAAA... your-key"
 ```
+
+Append more public keys as additional list entries. Keep private keys on their
+client devices or in a password manager; never commit them. The inventory's
+`ansible_ssh_private_key_file` selects the local private key Ansible connects with.
+
+Use a private inventory directory so Ansible also loads its `group_vars` files.
+For a standalone `hosts` file copied from `hosts.sample`, set `admin_user_ssh_keys`
+as a JSON-style list under `[all:vars]` instead.
 
 Removing a key from `admin_user_ssh_keys` does not revoke it: `authorized_key`
 adds keys but never prunes ones already on a server. Remove those by hand, or with
@@ -56,11 +57,11 @@ adds keys but never prunes ones already on a server. Remove those by hand, or wi
 
 ## Usage
 
-1. Provide an inventory, either by hand or from a private repo:
+1. Provide an inventory:
    - `cp hosts.sample hosts`, then set server addresses with `ansible_user=deploy`, or
-   - `make link-inventory` to symlink one in (defaults to
-     `~/dotfiles-private/ansible/hosts`; override with
-     `make link-inventory INVENTORY=/path/to/hosts`).
+   - `make link-inventory INVENTORY=/path/to/inventory` to symlink an external
+     inventory directory, including its `group_vars`. Rerun this command if
+     `hosts` previously linked to the inventory file rather than its directory.
 2. Set `cert_manager_email` in `group_vars/k3s_servers.yml` when provisioning k3s.
 
 A server is bootstrapped once as the provider's default user, and run as the

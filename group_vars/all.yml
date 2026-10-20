@@ -3,8 +3,3 @@ ufw_ssh_port: 22
 timezone: UTC
 
 admin_user_name: deploy
-
-# Replace with your own public key before provisioning your servers — see the
-# SSH Key Setup section of the README. The administrator has passwordless sudo.
-admin_user_ssh_keys:
-  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJtgWYfLFpuAcdIBtEjx+l9iiW8B4Dqhm22RRHfWPjhr server access"

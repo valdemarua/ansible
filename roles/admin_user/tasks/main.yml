@@ -1,4 +1,10 @@
 ---
+- name: Require administrator SSH public keys
+  ansible.builtin.assert:
+    that:
+      - admin_user_ssh_keys | length > 0
+    fail_msg: Set admin_user_ssh_keys in your private inventory before provisioning this host.
+
 - name: Create administrator account
   ansible.builtin.user:
     name: "{{ admin_user_name }}"

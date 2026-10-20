@@ -1,19 +1,22 @@
 .PHONY: setup lint test link-inventory
 
-# Private inventory lives in dotfiles-private; override to point elsewhere.
-INVENTORY ?= $(HOME)/dotfiles-private/ansible/hosts
+# Pass the path to your inventory file or directory when linking it.
+INVENTORY ?=
 
 setup:
 	uv sync
 	uv run ansible-galaxy collection install -r requirements.yml
 
-# Link the private inventory into this repo (hosts is gitignored).
+# Link the inventory directory, including group_vars (hosts is gitignored).
 link-inventory:
-	@test -f "$(INVENTORY)" || { \
+	@test -e "$(INVENTORY)" || { \
 		echo "No inventory at $(INVENTORY)"; \
-		echo "Clone dotfiles-private, or run: make link-inventory INVENTORY=/path/to/hosts"; \
+		echo "Run: make link-inventory INVENTORY=/path/to/inventory"; \
 		exit 1; }
-	@ln -sfn "$(INVENTORY)" hosts
+	@test ! -e hosts || test -L hosts || { \
+		echo "hosts already exists and is not a symlink; move it before linking an inventory"; \
+		exit 1; }
+	@ln -sfn "$(abspath $(INVENTORY))" hosts
 	@echo "hosts -> $(INVENTORY)"
 
 lint:
