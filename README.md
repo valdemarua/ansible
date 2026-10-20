@@ -88,13 +88,18 @@ a fresh server. Pass `-e ansible_ssh_private_key_file=...` to force a specific o
 
 ### Bootstrapping a development machine
 
-Members of the `devboxes` group default to a `dev` administrator with zsh. To
-use a personal account instead, override both the managed account and the normal
-SSH connection account in inventory:
+Members of the `devboxes` group default to a `dev` administrator with zsh:
 
 ```ini
 [devboxes]
-devbox.example.com ansible_user=valdemar admin_user_name=valdemar ansible_become=yes
+devbox.example.com ansible_user=dev ansible_become=yes
+```
+
+To choose a different neutral account name, override both the managed account
+and the normal SSH connection account, for example:
+
+```ini
+devbox.example.com ansible_user=admin admin_user_name=admin ansible_become=yes
 ```
 
 Use the provider account for the first run; the inventory account is used from
@@ -127,7 +132,7 @@ official user-scoped installer, clone the dotfiles, and Stow only the headless
 Linux packages:
 
 ```bash
-ssh valdemar@devbox.example.com
+ssh dev@devbox.example.com
 
 curl -fsSL https://mise.run | sh
 git clone https://github.com/valdemarua/dotfiles.git ~/dotfiles

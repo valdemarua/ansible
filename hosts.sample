@@ -9,8 +9,8 @@ your-k3s-server.com ansible_user=deploy ansible_become=yes
 your-base-server.com ansible_user=deploy ansible_become=yes
 
 [devboxes]
-# Override admin_user_name per host when you prefer a personal account:
-# your-personal-devbox.com ansible_user=valdemar admin_user_name=valdemar ansible_become=yes
+# Override admin_user_name per host when you prefer a different account:
+# your-custom-devbox.com ansible_user=admin admin_user_name=admin ansible_become=yes
 your-devbox.com ansible_user=dev ansible_become=yes
 
 # Local test VM — run bin/vm-setup to create and populate hosts.local
