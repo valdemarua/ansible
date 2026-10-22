@@ -180,7 +180,11 @@ development. These profile-specific packages are listed in `group_vars/devboxes.
 The profile installs Docker Engine, Compose, and Buildx, and adds the configured
 administrator to the Docker group. Log out and reconnect before using Docker
 without sudo. The firewall opens SSH only. Docker-published ports bypass UFW, so
-bind development services to localhost and reach them through an SSH tunnel:
+the devbox profile sets `docker_default_bind_ip: "127.0.0.1"`: a mapping such as
+`"5432:5432"` listens on localhost only. Writing the address explicitly keeps the
+same behavior on machines without that default, and an explicit
+`"0.0.0.0:5432:5432"` still publishes to the internet. Reach services through an
+SSH tunnel:
 
 ```yaml
 ports:
@@ -304,6 +308,7 @@ Key variables to configure per environment (see `group_vars/`):
 | `ufw_allowed_udp_ports` | `[]` | Additional UDP ports opened for a server profile |
 | `packages_extra` | `[]` | Additional APT packages installed for a server profile |
 | `docker_users` | configured administrator | Users added to the `docker` group |
+| `docker_default_bind_ip` | `""` (all interfaces) | Host address for published ports that name none; devboxes use `127.0.0.1` |
 | `sysctl_settings` | see `roles/sysctl/defaults/main.yml` | Kernel parameters written to `/etc/sysctl.d/99-server-tuning.conf` |
 | `cert_manager_email` | `admin@example.com` | ACME registration email |
 | `cert_manager_staging` | `true` | Use Let's Encrypt staging (set `false` for prod) |

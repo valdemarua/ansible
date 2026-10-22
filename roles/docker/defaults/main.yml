@@ -3,3 +3,9 @@ docker_log_max_size: "10m"
 docker_log_max_file: "3"
 docker_users:
   - "{{ admin_user_name }}"
+
+# Host address for published ports that do not name one ("5432:5432").
+# Empty keeps Docker's default of every interface. Docker-published ports bypass
+# ufw, so on hosts where nothing should be public set "127.0.0.1"; an explicit
+# "0.0.0.0:port:port" still overrides it.
+docker_default_bind_ip: ""

@@ -1,4 +1,7 @@
 {
+{% if docker_default_bind_ip %}
+  "ip": "{{ docker_default_bind_ip }}",
+{% endif %}
   "log-driver": "json-file",
   "log-opts": {
     "max-size": "{{ docker_log_max_size }}",

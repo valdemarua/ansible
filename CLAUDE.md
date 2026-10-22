@@ -57,7 +57,7 @@ for the expected hosts, connection settings, and key data. Inventory groups:
 
 **Playbook layering** via `import_playbook`:
 - `base.yml` — foundation (packages, admin_user, ssh_hardening, sysctl, ufw, fail2ban, logrotate). Targets `all`. First run: pass `-e ansible_user=ubuntu` (or whatever the provider's default user is) to create the configured administrator. All subsequent runs: use that administrator from inventory. The account defaults to `deploy` for backward compatibility.
-- `devbox.yml` — imports base, then installs Docker for `devboxes`. The profile defaults to a `dev` account with zsh and adds Stow; use `admin_user_name` to choose a personal account instead. Its UFW profile exposes SSH only.
+- `devbox.yml` — imports base, then installs Docker for `devboxes`. The profile defaults to a `dev` account with zsh and adds Stow; use `admin_user_name` to choose a personal account instead. Its UFW profile exposes SSH only, and `docker_default_bind_ip: 127.0.0.1` keeps Docker-published ports (which bypass UFW) on localhost.
 - `dokploy_server.yml` — imports `base.yml`, then installs Docker and Dokploy for `dokploy_servers`. Dokploy owns its application stack and Traefik instance.
 - `k3s_server.yml` — imports `base.yml`, then applies k3s + helm + cert_manager + argocd to `k3s_servers`.
 
