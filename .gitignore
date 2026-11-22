@@ -3,3 +3,4 @@ hosts.local
 *.vagrant
 *.log
 *.retry
+__pycache__/

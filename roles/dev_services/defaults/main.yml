@@ -1,0 +1,5 @@
+---
+dev_services_dir: /opt/dev-services
+
+# Set in the external inventory; there is no usable default credential.
+dev_services_postgres_password: ""

@@ -1,0 +1,56 @@
+---
+- name: Require a nonempty single-line PostgreSQL password from private inventory
+  ansible.builtin.assert:
+    that:
+      - dev_services_postgres_password is string
+      - dev_services_postgres_password | length > 0
+      - dev_services_postgres_password is not search('[\x00-\x1f\x7f]')
+    quiet: true
+  no_log: true
+
+# Docker may have queued a daemon restart; complete it before starting the
+# stack. No additional service manager is needed for Compose.
+- name: Apply pending Docker configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Create shared service directory
+  ansible.builtin.file:
+    path: "{{ dev_services_dir }}"
+    state: directory
+    owner: root
+    group: docker
+    mode: "0750"
+
+- name: Deploy shared service Compose file
+  ansible.builtin.copy:
+    src: compose.yaml
+    dest: "{{ dev_services_dir }}/compose.yaml"
+    owner: root
+    group: docker
+    mode: "0644"
+
+- name: Deploy private shared service environment
+  ansible.builtin.template:
+    src: dev-services.env.j2
+    dest: "{{ dev_services_dir }}/.env"
+    owner: root
+    group: docker
+    mode: "0640"
+  no_log: true
+  diff: false
+
+- name: Start shared PostgreSQL and Redis
+  community.docker.docker_compose_v2:
+    project_src: "{{ dev_services_dir }}"
+    services: [postgres, redis]
+    dependencies: false
+    state: present
+    pull: missing
+    recreate: auto
+    remove_orphans: false
+    remove_volumes: false
+    wait: true
+    wait_timeout: 180
+  # On a fresh host --check does not create the directory or install Compose.
+  when: not ansible_check_mode
+  no_log: true

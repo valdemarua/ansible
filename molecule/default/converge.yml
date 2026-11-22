@@ -1,0 +1,11 @@
+---
+- name: Apply the tested base roles together
+  hosts: all
+  become: true
+  vars:
+    packages_extra: [tree]
+    logrotate_keep: 7
+  roles:
+    - packages
+    - fail2ban
+    - logrotate

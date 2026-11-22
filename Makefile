@@ -1,4 +1,4 @@
-.PHONY: setup lint test link-inventory
+.PHONY: setup lint check test link-inventory
 
 # Pass the path to your inventory file or directory when linking it.
 INVENTORY ?=
@@ -22,8 +22,8 @@ link-inventory:
 lint:
 	uv run ansible-lint
 
+check: lint
+	uv run python -m unittest discover -s tests/dev_services -v
+
 test:
-	@for role in packages fail2ban logrotate; do \
-		echo "=== Testing $$role ==="; \
-		(cd roles/$$role && uv run molecule test) || exit 1; \
-	done
+	uv run molecule test

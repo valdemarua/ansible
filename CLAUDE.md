@@ -27,10 +27,14 @@ ansible-playbook k3s_server.yml --limit your-server.com
 ansible-playbook base.yml --check
 ```
 
-**Lint:**
+**Routine checks (no running Docker daemon required):**
 ```bash
-make lint
+make check  # ansible-lint + shared-service configuration tests
+make lint   # lint alone
 ```
+
+**Base role integration (Docker required):** `make test` runs the root
+`molecule/default` scenario for packages, fail2ban and logrotate together.
 
 **Integration tests (against a local Lima VM):**
 ```bash
@@ -57,7 +61,7 @@ for the expected hosts, connection settings, and key data. Inventory groups:
 
 **Playbook layering** via `import_playbook`:
 - `base.yml` — foundation (packages, admin_user, ssh_hardening, sysctl, ufw, fail2ban, logrotate). Targets `all`. First run: pass `-e ansible_user=ubuntu` (or whatever the provider's default user is) to create the configured administrator. All subsequent runs: use that administrator from inventory. The account defaults to `deploy` for backward compatibility.
-- `devbox.yml` — imports base, then installs Docker for `devboxes`. The profile defaults to a `dev` account with zsh and adds Stow; use `admin_user_name` to choose a personal account instead. Its UFW profile exposes SSH only, and `docker_default_bind_ip: 127.0.0.1` keeps Docker-published ports (which bypass UFW) on localhost.
+- `devbox.yml` — imports base, then applies `docker` and `dev_services` for `devboxes`. The profile defaults to a `dev` account with zsh and adds Stow; use `admin_user_name` to choose a personal account instead. Its UFW profile exposes SSH only, and `docker_default_bind_ip: 127.0.0.1` keeps Docker-published ports (which bypass UFW) on localhost. `dev_services` deploys shared PostgreSQL 18 and Redis from a static Compose file to `/opt/dev-services`, explicitly binding both ports to loopback. Set `dev_services_postgres_password` in private inventory before provisioning; secret file tasks suppress output/diffs. Runtime/CLI setup remains in dotfiles.
 - `dokploy_server.yml` — imports `base.yml`, then installs Docker and Dokploy for `dokploy_servers`. Dokploy owns its application stack and Traefik instance.
 - `k3s_server.yml` — imports `base.yml`, then applies k3s + helm + cert_manager + argocd to `k3s_servers`.
 
@@ -75,7 +79,26 @@ for the expected hosts, connection settings, and key data. Inventory groups:
 
 ## Testing
 
-CI runs `ansible-lint` + molecule (Docker) via `.github/workflows/ci.yml`. Integration testing is done locally against a Lima VM (`bin/vm-setup` + `ansible-playbook -i hosts.local`).
+CI runs `make check` and one `make test` job via `.github/workflows/ci.yml`.
+The root Molecule scenario tests packages, fail2ban and logrotate together,
+including idempotency and configuration validation. It does not exercise the
+full base playbook or host-level SSH/firewall/networking behavior. Deliberate
+Ubuntu host checks can use the optional Lima workflow; do not create a VM for
+routine changes.
+
+Shared services: `uv run python -m unittest discover -s tests/dev_services -v`
+checks Compose configuration/password rendering without a daemon.
+See README for a short manual smoke test on a disposable Ubuntu host. Keep this
+role small: it deploys a static Compose file/private environment and invokes the
+Compose module. The Molecule scenario does not cover `docker` or
+`dev_services`. Follow `AGENTS.md` for testing scope and deployment boundaries.
+
+Keep optional MySQL/MariaDB support deferred. Add a future shared service to
+`roles/dev_services/files/compose.yaml` with its own profile and keep it out of
+the default deployment task's `services` list. Optional credentials must not
+break Compose parsing when absent. Project-specific OpenSearch, Memcached and
+Selenium normally belong in application Compose files. See README for the full
+role catalog, extension locations, credentials, test isolation and operations.
 
 **colima users:** set `DOCKER_HOST` in `~/.zshrc` if needed for other tooling:
 ```bash

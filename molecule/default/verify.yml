@@ -1,0 +1,29 @@
+---
+- name: Verify base role behavior
+  hosts: all
+  become: true
+  tasks:
+    - name: Verify a configured extra package is usable
+      ansible.builtin.command: tree --version
+      changed_when: false
+
+    - name: Validate the installed fail2ban configuration
+      ansible.builtin.command: fail2ban-client -t
+      changed_when: false
+
+    - name: Verify the SSH jail is active
+      ansible.builtin.command: fail2ban-client status sshd
+      changed_when: false
+
+    - name: Validate logrotate configuration without rotating logs
+      ansible.builtin.command: logrotate --debug /etc/logrotate.conf
+      changed_when: false
+
+    - name: Read the rendered logrotate configuration
+      ansible.builtin.slurp:
+        src: /etc/logrotate.conf
+      register: logrotate_test_config
+
+    - name: Verify a nondefault retention setting was applied
+      ansible.builtin.assert:
+        that: logrotate_test_config.content | b64decode is search('(?m)^rotate 7$')
