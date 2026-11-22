@@ -1,5 +1,9 @@
 # This file managed by Ansible
 
+# Ubuntu logs are commonly under root:adm group-writable directories.
+# Specify rotation credentials instead of skipping them as insecure.
+su root adm
+
 # rotate log files {{ logrotate_frequency }}
 {{ logrotate_frequency }}
 
@@ -16,18 +20,3 @@ compress
 
 # packages drop log rotation information into this directory
 include /etc/logrotate.d
-
-# system-specific logs may be also be configured here
-/var/log/wtmp {
-    monthly
-    create 0664 root utmp
-    minsize 1M
-    rotate 1
-}
-
-/var/log/btmp {
-    missingok
-    monthly
-    create 0660 root utmp
-    rotate 1
-}
